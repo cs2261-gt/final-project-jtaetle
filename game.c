@@ -16,7 +16,10 @@ BIRD birds[BIRDCOUNT];
 LIZARD lizard;
 
 //Bird Animation State
-enum {CBIRD1, CBIRD2, CBIRD3, FBIRD1, FBIRD2, FBIRD3, L1, L2, L3};
+enum {CBIRD1, CBIRD2, CBIRD3, FBIRD1, FBIRD2, FBIRD3};
+
+//Lizard Animation State
+enum {L1, L2, L3};
 
 void initGame() {
 
@@ -125,7 +128,7 @@ void updateGame() {
      }
 
     //add lizard
-     if (lTimer == 250) {
+     if (lTimer == 350) {
         lizard.width = 16;
         lizard.height = 16;
         lizard.col = 240;
@@ -133,10 +136,10 @@ void updateGame() {
         while((lizard.row > 120) || (lizard.row < 0)) {
             lizard.row = rand() % 200;
         }
-        lizard.isActive = 0;
+        lizard.isActive = 1;
         lizard.aniState = L1;
         lizard.aniCounter = 0;
-
+        lTimer = 0;
      }
 
      //update mates position and aniState
@@ -163,7 +166,27 @@ void updateGame() {
         }
      } 
 
-     //update lizards po
+     //update lizards position and aniState
+     if (lizard.isActive) {
+        lizard.col--;
+        if (lizard.aniCounter == 8) {
+            if (lizard.aniState != L3) {
+                lizard.aniState++;
+            } else {
+                lizard.aniState = L1;
+            }
+            lizard.aniCounter = 0;
+        }
+        if (lizard.col == 0) {
+           lizard.isActive = 0;
+        }
+        if((collision(birds[0].col, birds[0].row, birds[0].width,
+        birds[0].height, lizard.col, lizard.row, lizard.width, lizard.height))) {
+            lizard.isActive = 0;
+            matesGone = 5;
+        }
+        lizard.aniCounter++;
+    }
 }
 
 void drawGame() {
@@ -172,6 +195,15 @@ void drawGame() {
     shadowOAM[0].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | birds[0].row;
     shadowOAM[0].attr1 = ATTR1_MEDIUM | birds[0].col;
     shadowOAM[0].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(birds[0].aniState * 4, 0 * 4);
+
+    //draw lizard
+    if (lizard.isActive) {
+        shadowOAM[4].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | lizard.row;
+        shadowOAM[4].attr1 = ATTR1_MEDIUM| lizard.col;
+        shadowOAM[4].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(lizard.aniState * 4, 4);
+    } else {
+            shadowOAM[4].attr0 = ATTR0_HIDE;
+    }
 
     //draw mates
    for(int i = 1; i < BIRDCOUNT; i++) {

@@ -93,6 +93,17 @@ typedef volatile struct {
 extern DMA *dma;
 # 251 "myLib.h"
 void DMANow(int channel, volatile const void *src, volatile void *dst, unsigned int cnt);
+# 342 "myLib.h"
+typedef struct{
+    const unsigned char* data;
+    int length;
+    int frequency;
+    int isPlaying;
+    int loops;
+    int duration;
+    int priority;
+    int vBlankCount;
+} SOUND;
 
 
 
@@ -130,11 +141,7 @@ typedef struct {
     int aniCounter;
     int isActive;
 } LIZARD;
-
-
-
-
-
+# 39 "game.h"
 int timer;
 
 
@@ -155,13 +162,13 @@ extern const unsigned short skyPal[256];
 # 4 "game.c" 2
 # 1 "treetop.h" 1
 # 22 "treetop.h"
-extern const unsigned short treetopTiles[6304];
+extern const unsigned short treetopTiles[3152];
 
 
 extern const unsigned short treetopMap[2048];
 
 
-extern const unsigned short treetopPal[256];
+extern const unsigned short treetopPal[16];
 # 5 "game.c" 2
 # 1 "spritesheet.h" 1
 # 21 "spritesheet.h"
@@ -1403,7 +1410,10 @@ BIRD birds[4];
 LIZARD lizard;
 
 
-enum {CBIRD1, CBIRD2, CBIRD3, FBIRD1, FBIRD2, FBIRD3, L1, L2, L3};
+enum {CBIRD1, CBIRD2, CBIRD3, FBIRD1, FBIRD2, FBIRD3};
+
+
+enum {L1, L2, L3};
 
 void initGame() {
 
@@ -1512,7 +1522,7 @@ void updateGame() {
      }
 
 
-     if (lTimer == 250) {
+     if (lTimer == 350) {
         lizard.width = 16;
         lizard.height = 16;
         lizard.col = 240;
@@ -1520,10 +1530,10 @@ void updateGame() {
         while((lizard.row > 120) || (lizard.row < 0)) {
             lizard.row = rand() % 200;
         }
-        lizard.isActive = 0;
+        lizard.isActive = 1;
         lizard.aniState = L1;
         lizard.aniCounter = 0;
-
+        lTimer = 0;
      }
 
 
@@ -1551,6 +1561,26 @@ void updateGame() {
      }
 
 
+     if (lizard.isActive) {
+        lizard.col--;
+        if (lizard.aniCounter == 8) {
+            if (lizard.aniState != L3) {
+                lizard.aniState++;
+            } else {
+                lizard.aniState = L1;
+            }
+            lizard.aniCounter = 0;
+        }
+        if (lizard.col == 0) {
+           lizard.isActive = 0;
+        }
+        if((collision(birds[0].col, birds[0].row, birds[0].width,
+        birds[0].height, lizard.col, lizard.row, lizard.width, lizard.height))) {
+            lizard.isActive = 0;
+            matesGone = 5;
+        }
+        lizard.aniCounter++;
+    }
 }
 
 void drawGame() {
@@ -1559,6 +1589,15 @@ void drawGame() {
     shadowOAM[0].attr0 = (0<<8) | (0<<13) | (0<<14) | birds[0].row;
     shadowOAM[0].attr1 = (2<<14) | birds[0].col;
     shadowOAM[0].attr2 = ((0)<<12) | ((0 * 4)*32+(birds[0].aniState * 4));
+
+
+    if (lizard.isActive) {
+        shadowOAM[4].attr0 = (0<<8) | (0<<13) | (0<<14) | lizard.row;
+        shadowOAM[4].attr1 = (2<<14)| lizard.col;
+        shadowOAM[4].attr2 = ((0)<<12) | ((4)*32+(lizard.aniState * 4));
+    } else {
+            shadowOAM[4].attr0 = (2<<8);
+    }
 
 
    for(int i = 1; i < 4; i++) {
