@@ -18,7 +18,6 @@ typedef struct {
 } BIRD;
 
 //Lizard Struct
-//Bird Struct
 typedef struct {
 	int row;
 	int col;

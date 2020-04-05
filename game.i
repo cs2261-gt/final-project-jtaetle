@@ -141,7 +141,11 @@ typedef struct {
     int aniCounter;
     int isActive;
 } LIZARD;
-# 39 "game.h"
+
+
+
+
+
 int timer;
 
 
