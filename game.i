@@ -1510,10 +1510,6 @@ void updateGame() {
         }
     }
 
-    if ((!(~(oldButtons)&((1<<0))) && (~buttons & ((1<<0))))) {
-        level2 = 1;
-    }
-
 
     if (birds[0].aniCounter == 8) {
         if (birds[0].aniState != CBIRD3) {
@@ -1616,10 +1612,10 @@ void updateGame() {
      for (int i = 0; i < 4; i++) {
         if (lizard[i].isActive) {
             if (level2) {
-                if (lizard[i].col < 3) {
+                if (lizard[i].col < 2) {
                     lizard[i].isActive = 0;
                 } else {
-                    lizard[i].col -= 3;
+                    lizard[i].col -= 2;
                 }
             } else {
                 if (lizard[i].col == 0) {

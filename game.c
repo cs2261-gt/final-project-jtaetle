@@ -110,10 +110,6 @@ void updateGame() {
         }
     }
 
-    if (BUTTON_PRESSED(BUTTON_A)) {
-        level2 = 1;
-    }
-
     //Update casanova aniState
     if (birds[0].aniCounter == 8) {
         if (birds[0].aniState != CBIRD3) {
@@ -216,10 +212,10 @@ void updateGame() {
      for (int i = 0; i < LIZARDCOUNT; i++) {
         if (lizard[i].isActive) {
             if (level2) {
-                if (lizard[i].col < 3) {
+                if (lizard[i].col < 2) {
                     lizard[i].isActive = 0;
                 } else {
-                    lizard[i].col -= 3;
+                    lizard[i].col -= 2;
                 }
             } else {
                 if (lizard[i].col == 0) {
