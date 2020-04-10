@@ -40,9 +40,6 @@ int timer;
 //timer for new lizard
 int lTimer;
 
-//lizard timer based on level
-int lTimerLimit;
-
 //keep track of mates lost
 int matesGone;
 

@@ -147,9 +147,6 @@ int timer;
 int lTimer;
 
 
-int lTimerLimit;
-
-
 int matesGone;
 
 
@@ -1489,6 +1486,9 @@ void updateGame() {
 
     if (matesKissed == 10) {
         level2 = 1;
+        if (lTimer > 100) {
+            lTimer = 50;
+        }
     } else if (matesKissed == 20) {
         level3 = 1;
     }
@@ -1616,10 +1616,10 @@ void updateGame() {
      for (int i = 0; i < 4; i++) {
         if (lizard[i].isActive) {
             if (level2) {
-                if (lizard[i].col > 3) {
-                    lizard[i].col -= 3;
-                } else {
+                if (lizard[i].col < 3) {
                     lizard[i].isActive = 0;
+                } else {
+                    lizard[i].col -= 3;
                 }
             } else {
                 if (lizard[i].col == 0) {
