@@ -31,11 +31,24 @@ typedef struct {
 //Count of birds
 #define BIRDCOUNT 4
 
+//Count of lizards
+#define LIZARDCOUNT 4
+
 //timer for new mate
 int timer;
 
 //timer for new lizard
 int lTimer;
 
+//lizard timer based on level
+int lTimerLimit;
+
 //keep track of mates lost
 int matesGone;
+
+//Levels
+int level2;
+int level3;
+
+//Keep track of mates kissed
+int matesKissed;

@@ -13,7 +13,7 @@ OBJ_ATTR shadowOAM[128];
 BIRD birds[BIRDCOUNT];
 
 //Lizard
-LIZARD lizard;
+LIZARD lizard[LIZARDCOUNT];
 
 //Bird Animation State
 enum {CBIRD1, CBIRD2, CBIRD3, FBIRD1, FBIRD2, FBIRD3};
@@ -48,17 +48,19 @@ void initGame() {
         birds[i].aniCounter = 0;
     }
 
-    //initialize lizard
-    lizard.width = 16;
-    lizard.height = 16;
-    lizard.col = 240;
-    lizard.row = rand() % 200;
-    while((lizard.row > 120) || (lizard.row < 0)) {
-        lizard.row = rand() % 200;
+    //initialize lizards
+    for(int i = 0; i < LIZARDCOUNT; i++) {
+        lizard[i].width = 16;
+        lizard[i].height = 16;
+        lizard[i].col = 240;
+        lizard[i].row = rand() % 200;
+        while((lizard[i].row > 120) || (lizard[i].row < 0)) {
+            lizard[i].row = rand() % 200;
+        }
+        lizard[i].isActive = 0;
+        lizard[i].aniState = L1;
+        lizard[i].aniCounter = 0;
     }
-    lizard.isActive = 0;
-    lizard.aniState = L1;
-    lizard.aniCounter = 0;
 
     //initialize timer
     timer = 95;
@@ -68,11 +70,25 @@ void initGame() {
 
     //initialize matesGone
     matesGone = 0;
+
+    //initialize matesKissed
+    matesKissed = 0;
+
+    //initialize levels
+    level2 = 0;
+    level3 = 0;
 }
 
 void updateGame() {
     //update background parallax
     hOff++;
+
+    //check if level needs to change
+    if (matesKissed == 10) {
+        level2 = 1;
+    } else if (matesKissed == 20) {
+        level3 = 1;
+    }
 
     //Update casanova positiion
     if (BUTTON_HELD(BUTTON_UP)) {
@@ -89,6 +105,10 @@ void updateGame() {
         } else {
             birds[0].row = birds[0].row;
         }
+    }
+
+    if (BUTTON_PRESSED(BUTTON_A)) {
+        level2 = 1;
     }
 
     //Update casanova aniState
@@ -128,19 +148,41 @@ void updateGame() {
      }
 
     //add lizard
-     if (lTimer == 350) {
-        lizard.width = 16;
-        lizard.height = 16;
-        lizard.col = 240;
-        lizard.row = rand() % 200;
-        while((lizard.row > 120) || (lizard.row < 0)) {
-            lizard.row = rand() % 200;
+    if (level2 == 1) {
+        if (lTimer == 100) {
+            for (int i = 0; i < LIZARDCOUNT; i++) {
+                if (!lizard[i].isActive) {
+                    lizard[i].col = 240;
+                    lizard[i].row = rand() % 200;
+                    while((lizard[i].row > 120) || (lizard[i].row < 0)) {
+                        lizard[i].row = rand() % 200;
+                    }
+                    lizard[i].isActive = 1;
+                    lizard[i].aniState = L1;
+                    lizard[i].aniCounter = 0;
+                    break;
+                }
+            }
+            lTimer = 0;
         }
-        lizard.isActive = 1;
-        lizard.aniState = L1;
-        lizard.aniCounter = 0;
-        lTimer = 0;
-     }
+    } else {
+        if (lTimer == 350) {
+            for (int i = 0; i < LIZARDCOUNT; i++) {
+                if (!lizard[i].isActive) {
+                    lizard[i].col = 240;
+                    lizard[i].row = rand() % 200;
+                    while((lizard[i].row > 120) || (lizard[i].row < 0)) {
+                        lizard[i].row = rand() % 200;
+                    }
+                    lizard[i].isActive = 1;
+                    lizard[i].aniState = L1;
+                    lizard[i].aniCounter = 0;
+                    break;
+                }
+            }
+            lTimer = 0;
+        }
+    }
 
      //update mates position and aniState
      for (int i = 1; i < BIRDCOUNT; i++) {
@@ -161,31 +203,43 @@ void updateGame() {
             if((collision(birds[0].col, birds[0].row, birds[0].width,
             birds[0].height, birds[i].col, birds[i].row, birds[i].width, birds[i].height))) {
                 birds[i].isActive = 0;
+                matesKissed++;
             }
             birds[i].aniCounter++;
         }
      } 
 
      //update lizards position and aniState
-     if (lizard.isActive) {
-        lizard.col--;
-        if (lizard.aniCounter == 8) {
-            if (lizard.aniState != L3) {
-                lizard.aniState++;
+     for (int i = 0; i < LIZARDCOUNT; i++) {
+        if (lizard[i].isActive) {
+            if (level2) {
+                if (lizard[i].col > 3) {
+                    lizard[i].col -= 3;
+                } else {
+                    lizard[i].isActive = 0;
+                }
             } else {
-                lizard.aniState = L1;
+                if (lizard[i].col == 0) {
+                    lizard[i].isActive = 0;
+                } else {
+                    lizard[i].col--;
+                }
             }
-            lizard.aniCounter = 0;
+            if (lizard[i].aniCounter == 8) {
+                if (lizard[i].aniState != L3) {
+                    lizard[i].aniState++;
+                } else {
+                    lizard[i].aniState = L1;
+                }
+                lizard[i].aniCounter = 0;
+            }
+            if((collision(birds[0].col, birds[0].row, birds[0].width,
+            birds[0].height, lizard[i].col, lizard[i].row, lizard[i].width, lizard[i].height))) {
+                lizard[i].isActive = 0;
+                matesGone = 5;
+            }
+            lizard[i].aniCounter++;
         }
-        if (lizard.col == 0) {
-           lizard.isActive = 0;
-        }
-        if((collision(birds[0].col, birds[0].row, birds[0].width,
-        birds[0].height, lizard.col, lizard.row, lizard.width, lizard.height))) {
-            lizard.isActive = 0;
-            matesGone = 5;
-        }
-        lizard.aniCounter++;
     }
 }
 
@@ -196,13 +250,15 @@ void drawGame() {
     shadowOAM[0].attr1 = ATTR1_MEDIUM | birds[0].col;
     shadowOAM[0].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(birds[0].aniState * 4, 0 * 4);
 
-    //draw lizard
-    if (lizard.isActive) {
-        shadowOAM[4].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | lizard.row;
-        shadowOAM[4].attr1 = ATTR1_MEDIUM| lizard.col;
-        shadowOAM[4].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(lizard.aniState * 4, 4);
-    } else {
-            shadowOAM[4].attr0 = ATTR0_HIDE;
+    //draw lizards
+    for (int i = 0; i < LIZARDCOUNT; i++) {
+        if (lizard[i].isActive) {
+            shadowOAM[4+i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | lizard[i].row;
+            shadowOAM[4+i].attr1 = ATTR1_MEDIUM| lizard[i].col;
+            shadowOAM[4+i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(lizard[i].aniState * 4, 4);
+        } else {
+            shadowOAM[4+i].attr0 = ATTR0_HIDE;
+        }
     }
 
     //draw mates
@@ -212,7 +268,7 @@ void drawGame() {
             shadowOAM[i].attr1 = ATTR1_MEDIUM| birds[i].col;
             shadowOAM[i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(birds[i].aniState * 4, 0 * 4);
         } else {
-                shadowOAM[i].attr0 = ATTR0_HIDE;
+            shadowOAM[i].attr0 = ATTR0_HIDE;
         }
     }
     waitForVBlank();
