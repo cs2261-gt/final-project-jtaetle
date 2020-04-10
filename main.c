@@ -207,7 +207,7 @@ void goToLose() {
     DMANow(3, loseMap, &SCREENBLOCK[28], 1024 * 4);
     
     hideSprites();
-    DMANow(3, shadowOAM, OAM, spritesheetPalLen);
+    DMANow(3, shadowOAM, OAM, 512);
     state = LOSE;
 }
 

@@ -93,6 +93,17 @@ typedef volatile struct {
 extern DMA *dma;
 # 251 "myLib.h"
 void DMANow(int channel, volatile const void *src, volatile void *dst, unsigned int cnt);
+# 342 "myLib.h"
+typedef struct{
+    const unsigned char* data;
+    int length;
+    int frequency;
+    int isPlaying;
+    int loops;
+    int duration;
+    int priority;
+    int vBlankCount;
+} SOUND;
 
 
 
@@ -111,7 +122,7 @@ extern const unsigned short startPal[16];
 # 3 "main.c" 2
 # 1 "instructions.h" 1
 # 22 "instructions.h"
-extern const unsigned short instructionsTiles[6416];
+extern const unsigned short instructionsTiles[6032];
 
 
 extern const unsigned short instructionsMap[1024];
@@ -150,7 +161,6 @@ typedef struct {
 } BIRD;
 
 
-
 typedef struct {
  int row;
  int col;
@@ -162,16 +172,38 @@ typedef struct {
 } LIZARD;
 
 
-
-
-
+typedef struct {
+    int row;
+ int col;
+ int width;
+    int height;
+    int isActive;
+} FIREBALL;
+# 51 "game.h"
 int timer;
 
 
 int lTimer;
 
 
+int fTimer;
+
+
 int matesGone;
+
+
+int activeLizard;
+
+
+int level2;
+int level3;
+
+
+int matesKissed;
+
+
+
+int isCheat;
 # 6 "main.c" 2
 # 1 "pause.h" 1
 # 22 "pause.h"
@@ -202,13 +234,13 @@ extern const unsigned short spritesheetPal[16];
 # 9 "main.c" 2
 # 1 "treetop.h" 1
 # 22 "treetop.h"
-extern const unsigned short treetopTiles[6304];
+extern const unsigned short treetopTiles[3152];
 
 
 extern const unsigned short treetopMap[2048];
 
 
-extern const unsigned short treetopPal[256];
+extern const unsigned short treetopPal[16];
 # 10 "main.c" 2
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 1 3
 # 10 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 3
@@ -1548,7 +1580,7 @@ void goToGame() {
 
     (*(volatile unsigned short*)0x4000008) = ((0)<<2) | ((28)<<8) | (0<<7) | (1<<14);
 
-    DMANow(3, treetopTiles, &((charblock *)0x6000000)[0], 12608 / 2);
+    DMANow(3, treetopTiles, &((charblock *)0x6000000)[0], 6304 / 2);
 
     DMANow(3, treetopMap, &((screenblock *)0x6000000)[28], 4096 / 2);
 
@@ -1602,7 +1634,7 @@ void pause() {
 
 void goToInstructions() {
     DMANow(3, instructionsPal, ((unsigned short *)0x5000000), 16);
-    DMANow(3, instructionsTiles, &((charblock *)0x6000000)[0], 12832 / 2);
+    DMANow(3, instructionsTiles, &((charblock *)0x6000000)[0], 12064 / 2);
     DMANow(3, instructionsMap, &((screenblock *)0x6000000)[28], 1024 * 4);
 
     state = INSTRUCTIONS;
@@ -1630,7 +1662,7 @@ void goToLose() {
     DMANow(3, loseMap, &((screenblock *)0x6000000)[28], 1024 * 4);
 
     hideSprites();
-    DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 32);
+    DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 512);
     state = LOSE;
 }
 

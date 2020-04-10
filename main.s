@@ -119,36 +119,36 @@ goToGame:
 	mov	lr, pc
 	bx	r4
 	mov	r2, #23552
-	mov	r0, #3
+	mov	r3, #3152
 	strh	r2, [r5, #8]	@ movhi
-	ldr	r3, .L12+28
+	mov	r0, #3
 	mov	r2, #100663296
-	ldr	r1, .L12+32
+	ldr	r1, .L12+28
 	mov	lr, pc
 	bx	r4
 	mov	r3, #2048
 	mov	r0, #3
-	ldr	r2, .L12+36
-	ldr	r1, .L12+40
+	ldr	r2, .L12+32
+	ldr	r1, .L12+36
 	mov	lr, pc
 	bx	r4
 	mov	r3, #256
 	mov	r0, #3
-	ldr	r2, .L12+44
-	ldr	r1, .L12+48
+	ldr	r2, .L12+40
+	ldr	r1, .L12+44
 	mov	lr, pc
 	bx	r4
-	ldr	r2, .L12+52
+	ldr	r2, .L12+48
 	mov	r3, #16384
 	mov	r0, #3
-	ldr	r1, .L12+56
+	ldr	r1, .L12+52
 	mov	lr, pc
 	bx	r4
-	ldr	r3, .L12+60
+	ldr	r3, .L12+56
 	mov	lr, pc
 	bx	r3
 	mov	r2, #1
-	ldr	r3, .L12+64
+	ldr	r3, .L12+60
 	pop	{r4, r5, r6, lr}
 	str	r2, [r3]
 	bx	lr
@@ -162,7 +162,6 @@ goToGame:
 	.word	skyTiles
 	.word	100724736
 	.word	skyMap
-	.word	6304
 	.word	treetopTiles
 	.word	100720640
 	.word	treetopMap
@@ -327,7 +326,7 @@ goToInstructions:
 .L34:
 	.word	DMANow
 	.word	instructionsPal
-	.word	6416
+	.word	6032
 	.word	instructionsTiles
 	.word	100720640
 	.word	instructionsMap
@@ -449,7 +448,7 @@ goToLose:
 	ldr	r3, .L56+20
 	mov	lr, pc
 	bx	r3
-	mov	r3, #32
+	mov	r3, #512
 	mov	r2, #117440512
 	mov	r0, #3
 	ldr	r1, .L56+24
@@ -655,7 +654,13 @@ lose:
 	.comm	seed,4,4
 	.comm	oldButtons,2,2
 	.comm	buttons,2,2
+	.comm	isCheat,4,4
+	.comm	matesKissed,4,4
+	.comm	level3,4,4
+	.comm	level2,4,4
+	.comm	activeLizard,4,4
 	.comm	matesGone,4,4
+	.comm	fTimer,4,4
 	.comm	lTimer,4,4
 	.comm	timer,4,4
 	.comm	hOff,2,2

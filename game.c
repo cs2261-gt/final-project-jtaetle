@@ -12,8 +12,11 @@ OBJ_ATTR shadowOAM[128];
 //Bird Pooling
 BIRD birds[BIRDCOUNT];
 
-//Lizard
+//Lizard Pooling
 LIZARD lizard[LIZARDCOUNT];
+
+//Fireball Pooling
+FIREBALL fireball[FIREBALLCOUNT];
 
 //Bird Animation State
 enum {CBIRD1, CBIRD2, CBIRD3, FBIRD1, FBIRD2, FBIRD3};
@@ -26,8 +29,8 @@ void initGame() {
     hOff = 134;
 
     //initialize casanova
-    birds[0].width = 16;
-    birds[0].height = 16;
+    birds[0].width = 32;
+    birds[0].height = 32;
     birds[0].col = 16;
     birds[0].row = (SCREENHEIGHT / 2 - 16);
     birds[0].isActive = 1;
@@ -36,8 +39,8 @@ void initGame() {
 
     //initialize mates
     for (int i = 1; i < BIRDCOUNT; i++) {
-        birds[i].width = 16;
-        birds[i].height = 16;
+        birds[i].width = 32;
+        birds[i].height = 32;
         birds[i].col = 240;
         birds[i].row = rand() % 200;
         while((birds[i].row > 120) || birds[i].row < 0) {
@@ -50,8 +53,8 @@ void initGame() {
 
     //initialize lizards
     for(int i = 0; i < LIZARDCOUNT; i++) {
-        lizard[i].width = 16;
-        lizard[i].height = 16;
+        lizard[i].width = 32;
+        lizard[i].height = 32;
         lizard[i].col = 240;
         lizard[i].row = rand() % 200;
         while((lizard[i].row > 120) || (lizard[i].row < 0)) {
@@ -62,11 +65,24 @@ void initGame() {
         lizard[i].aniCounter = 0;
     }
 
+    for (int j = 0; j < FIREBALLCOUNT; j++) {
+        fireball[j].col = 240;
+        fireball[j].row = rand() % 200;
+        while((fireball[j].row > 120) || (fireball[j].row < 0)) {
+            fireball[j].row = rand() % 200;
+        }
+        fireball[j].width = 16;
+        fireball[j].height = 16;
+        fireball[j].isActive = 0;
+    }
     //initialize timer
     timer = 95;
 
     //initialize lizard timer
     lTimer = 0;
+
+    //initialize fireball timer
+    fTimer = 0;
 
     //initialize matesGone
     matesGone = 0;
@@ -77,6 +93,7 @@ void initGame() {
     //initialize levels
     level2 = 0;
     level3 = 0;
+
 }
 
 void updateGame() {
@@ -84,7 +101,7 @@ void updateGame() {
     hOff++;
 
     //check if level needs to change
-    if (matesKissed == 10) {
+   if (matesKissed == 10) {
         level2 = 1;
         if (lTimer > 100) {
             lTimer = 50;
@@ -159,6 +176,17 @@ void updateGame() {
                     lizard[i].isActive = 1;
                     lizard[i].aniState = L1;
                     lizard[i].aniCounter = 0;
+                    if (level3) {
+                        for (int j = 0; j < FIREBALLCOUNT; j++) {
+                            if(!fireball[j].isActive) {
+                                fireball[j].col = lizard[i].col;
+                                fireball[j].row = lizard[i].row + 8;
+                                fireball[j].isActive = 1;
+                                break;
+                            }
+                            fTimer = 0;
+                        }
+                    }
                     break;
                 }
             }
@@ -209,7 +237,7 @@ void updateGame() {
      } 
 
      //update lizards position and aniState
-     for (int i = 0; i < LIZARDCOUNT; i++) {
+    for (int i = 0; i < LIZARDCOUNT; i++) {
         if (lizard[i].isActive) {
             if (level2) {
                 if (lizard[i].col < 2) {
@@ -238,6 +266,24 @@ void updateGame() {
                 matesGone = 5;
             }
             lizard[i].aniCounter++;
+
+            //update fireball
+            if (level3) {
+                for(int j = 0; j < FIREBALLCOUNT; j++) {
+                    if (fireball[j].isActive) {
+                        if (fireball[j].col < 3) {
+                            fireball[j].isActive = 0;
+                        } else {
+                            fireball[j].col = fireball[j].col - 3;
+                        }
+                        if((collision(birds[0].col, birds[0].row, birds[0].width,
+                        birds[0].height, fireball[j].col, fireball[j].row, fireball[j].width, fireball[j].height))) {
+                            fireball[j].isActive = 0;
+                            matesGone = 5;
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -249,31 +295,43 @@ void drawGame() {
     shadowOAM[0].attr1 = ATTR1_MEDIUM | birds[0].col;
     shadowOAM[0].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(birds[0].aniState * 4, 0 * 4);
 
+    //draw mates
+   for(int i = 1; i < BIRDCOUNT; i++) {
+        if (birds[i].isActive) {
+            shadowOAM[i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | birds[i].row;
+            shadowOAM[i].attr1 = ATTR1_MEDIUM | birds[i].col;
+            shadowOAM[i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(birds[i].aniState * 4, 0 * 4);
+        } else {
+            shadowOAM[i].attr0 = ATTR0_HIDE;
+        }
+    }
+
     //draw lizards
     for (int i = 0; i < LIZARDCOUNT; i++) {
         if (lizard[i].isActive) {
             shadowOAM[4+i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | lizard[i].row;
-            shadowOAM[4+i].attr1 = ATTR1_MEDIUM| lizard[i].col;
+            shadowOAM[4+i].attr1 = ATTR1_MEDIUM | lizard[i].col;
             shadowOAM[4+i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(lizard[i].aniState * 4, 4);
         } else {
             shadowOAM[4+i].attr0 = ATTR0_HIDE;
         }
     }
 
-    //draw mates
-   for(int i = 1; i < BIRDCOUNT; i++) {
-        if (birds[i].isActive) {
-            shadowOAM[i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | birds[i].row;
-            shadowOAM[i].attr1 = ATTR1_MEDIUM| birds[i].col;
-            shadowOAM[i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(birds[i].aniState * 4, 0 * 4);
+    //draw fireball
+    for (int i = 0; i < FIREBALLCOUNT; i++) {
+        if (fireball[i].isActive) {
+            shadowOAM[7+i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | fireball[i].row;
+            shadowOAM[7+i].attr1 = ATTR1_SMALL | fireball[i].col;
+            shadowOAM[7+i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(12, 6);
         } else {
-            shadowOAM[i].attr0 = ATTR0_HIDE;
+            shadowOAM[7+i].attr0 = ATTR0_HIDE;
         }
     }
+
     waitForVBlank();
 
     REG_BG1HOFF = hOff / 4;
     REG_BG0HOFF = hOff / 2;
 
-    DMANow(3, shadowOAM, OAM, spritesheetPalLen);
+    DMANow(3, shadowOAM, OAM, 512);
 }
