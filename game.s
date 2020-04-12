@@ -778,22 +778,22 @@ updateGame:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, lr}
 	ldr	r0, .L163
-	ldr	r4, .L163+4
+	ldr	lr, .L163+4
 	ldr	ip, .L163+8
 	ldr	r3, .L163+12
-	ldrh	r1, [r4]
-	ldr	lr, [r3]
+	ldrh	r1, [lr]
+	ldr	r4, [r3]
 	ldr	r2, [r0]
 	ldr	r3, [ip]
 	add	r1, r1, #1
 	add	r2, r2, #1
 	add	r3, r3, #1
-	cmp	lr, #1
-	strh	r1, [r4]	@ movhi
+	cmp	r4, #10
+	strh	r1, [lr]	@ movhi
 	str	r2, [r0]
 	str	r3, [ip]
 	beq	.L162
-	cmp	lr, #2
+	cmp	r4, #20
 	beq	.L159
 .L161:
 	ldr	r4, .L163+16
@@ -820,9 +820,10 @@ updateGame:
 	pop	{r4, lr}
 	bx	lr
 .L162:
+	mov	r1, #1
 	ldr	r2, .L163+20
 	cmp	r3, #100
-	str	lr, [r2]
+	str	r1, [r2]
 	ble	.L161
 	mov	r3, #50
 	ldr	r4, .L163+16

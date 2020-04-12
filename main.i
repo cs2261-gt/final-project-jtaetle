@@ -112,13 +112,13 @@ int collision(int colA, int rowA, int widthA, int heightA, int colB, int rowB, i
 # 2 "main.c" 2
 # 1 "start.h" 1
 # 22 "start.h"
-extern const unsigned short startTiles[3216];
+extern const unsigned short startTiles[3472];
 
 
 extern const unsigned short startMap[1024];
 
 
-extern const unsigned short startPal[16];
+extern const unsigned short startPal[256];
 # 3 "main.c" 2
 # 1 "instructions.h" 1
 # 22 "instructions.h"
@@ -145,6 +145,20 @@ extern const unsigned short skyPal[256];
 void initGame();
 void updateGame();
 void drawGame();
+void initCasanova();
+void updateCasanova();
+void drawCasanova();
+void initMates();
+void addMates();
+void updateMates();
+void drawMates();
+void initLizard();
+void addLizard();
+void updateLizard();
+void drawLizard();
+void initFireball();
+void updateFireball();
+void drawFireball();
 
 
 unsigned short hOff;
@@ -179,7 +193,7 @@ typedef struct {
     int height;
     int isActive;
 } FIREBALL;
-# 51 "game.h"
+# 65 "game.h"
 int timer;
 
 
@@ -1541,7 +1555,7 @@ void initialize() {
 
 void goToStart() {
     DMANow(3, startPal, ((unsigned short *)0x5000000), 16);
-    DMANow(3, startTiles, &((charblock *)0x6000000)[0], 6432 / 2);
+    DMANow(3, startTiles, &((charblock *)0x6000000)[0], 6944 / 2);
     DMANow(3, startMap, &((screenblock *)0x6000000)[28], 1024 * 4);
 
     state = START;

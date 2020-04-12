@@ -1501,12 +1501,12 @@ void updateGame() {
     lTimer++;
 
 
-   if (matesKissed == 1) {
+   if (matesKissed == 10) {
         level2 = 1;
         if (lTimer > 100) {
             lTimer = 50;
         }
-    } else if (matesKissed == 2) {
+    } else if (matesKissed == 20) {
         level3 = 1;
     }
 
@@ -1697,6 +1697,7 @@ void addLizard() {
                     lizard[i].isActive = 1;
                     lizard[i].aniState = L1;
                     lizard[i].aniCounter = 0;
+
                     if (level3) {
                         for (int j = 0; j < 9; j++) {
                             if(!fireball[j].isActive) {
