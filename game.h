@@ -2,6 +2,20 @@
 void initGame();
 void updateGame();
 void drawGame();
+void initCasanova();
+void updateCasanova();
+void drawCasanova();
+void initMates();
+void addMates();
+void updateMates();
+void drawMates();
+void initLizard();
+void addLizard();
+void updateLizard();
+void drawLizard();
+void initFireball();
+void updateFireball();
+void drawFireball();
 
 //Horizontal Offset
 unsigned short hOff;

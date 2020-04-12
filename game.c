@@ -28,53 +28,14 @@ void initGame() {
 
     hOff = 134;
 
-    //initialize casanova
-    birds[0].width = 32;
-    birds[0].height = 32;
-    birds[0].col = 16;
-    birds[0].row = (SCREENHEIGHT / 2 - 16);
-    birds[0].isActive = 1;
-    birds[0].aniState = CBIRD1;
-    birds[0].aniCounter = 0;
+    initCasanova();
 
-    //initialize mates
-    for (int i = 1; i < BIRDCOUNT; i++) {
-        birds[i].width = 32;
-        birds[i].height = 32;
-        birds[i].col = 240;
-        birds[i].row = rand() % 200;
-        while((birds[i].row > 120) || birds[i].row < 0) {
-             birds[i].row = rand() % 200;
-        }
-        birds[i].isActive = 0;
-        birds[i].aniState = FBIRD1;
-        birds[i].aniCounter = 0;
-    }
+    initMates();
 
-    //initialize lizards
-    for(int i = 0; i < LIZARDCOUNT; i++) {
-        lizard[i].width = 32;
-        lizard[i].height = 32;
-        lizard[i].col = 240;
-        lizard[i].row = rand() % 200;
-        while((lizard[i].row > 120) || (lizard[i].row < 0)) {
-            lizard[i].row = rand() % 200;
-        }
-        lizard[i].isActive = 0;
-        lizard[i].aniState = L1;
-        lizard[i].aniCounter = 0;
-    }
+    initLizard();
 
-    for (int j = 0; j < FIREBALLCOUNT; j++) {
-        fireball[j].col = 240;
-        fireball[j].row = rand() % 200;
-        while((fireball[j].row > 120) || (fireball[j].row < 0)) {
-            fireball[j].row = rand() % 200;
-        }
-        fireball[j].width = 16;
-        fireball[j].height = 16;
-        fireball[j].isActive = 0;
-    }
+    initFireball();
+
     //initialize timer
     timer = 95;
 
@@ -100,17 +61,66 @@ void updateGame() {
     //update background parallax
     hOff++;
 
+    //update timer
+    timer++;
+
+    //update lizard timer
+    lTimer++;
+
     //check if level needs to change
-   if (matesKissed == 10) {
+   if (matesKissed == 1) {
         level2 = 1;
         if (lTimer > 100) {
             lTimer = 50;
         }
-    } else if (matesKissed == 20) {
+    } else if (matesKissed == 2) {
         level3 = 1;
     }
 
-    //Update casanova positiion
+    updateCasanova();
+
+    addMates();
+
+    addLizard();
+
+    updateMates();
+
+    updateLizard();
+
+    updateFireball();
+}
+
+void drawGame() {
+    
+    drawCasanova();
+
+    drawMates();
+
+    drawLizard();
+
+    drawFireball();
+
+    waitForVBlank();
+
+    REG_BG1HOFF = hOff / 4;
+    REG_BG0HOFF = hOff / 2;
+
+    DMANow(3, shadowOAM, OAM, 512);
+}
+
+//initializes casanova
+void initCasanova() {
+    birds[0].width = 32;
+    birds[0].height = 32;
+    birds[0].col = 16;
+    birds[0].row = (SCREENHEIGHT / 2 - 16);
+    birds[0].isActive = 1;
+    birds[0].aniState = CBIRD1;
+    birds[0].aniCounter = 0;
+}
+
+//Update casanova positiion
+void updateCasanova() {
     if (BUTTON_HELD(BUTTON_UP)) {
         if (birds[0].row > 0) {
             birds[0].row -= 1;
@@ -138,13 +148,33 @@ void updateGame() {
     }
 
     birds[0].aniCounter++;
+}
 
-    //update timer
-    timer++;
+//draw Casanova
+void drawCasanova(){
+    shadowOAM[0].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | birds[0].row;
+    shadowOAM[0].attr1 = ATTR1_MEDIUM | birds[0].col;
+    shadowOAM[0].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(birds[0].aniState * 4, 0 * 4);
+}
 
-    //update lizard timer
-    lTimer++;
+//initializes mates
+void initMates() {
+    for (int i = 1; i < BIRDCOUNT; i++) {
+        birds[i].width = 32;
+        birds[i].height = 32;
+        birds[i].col = 240;
+        birds[i].row = rand() % 200;
+        while((birds[i].row > 120) || birds[i].row < 0) {
+             birds[i].row = rand() % 200;
+        }
+        birds[i].isActive = 0;
+        birds[i].aniState = FBIRD1;
+        birds[i].aniCounter = 0;
+    }
+}
 
+//add new mates
+void addMates() {
     //add new mates
    if (timer == 100) {
         for (int i = 1; i < BIRDCOUNT; i++) {
@@ -162,8 +192,66 @@ void updateGame() {
         }
         timer = 0;
      }
+}
 
-    //add lizard
+//update mates position and aniState
+void updateMates() {
+     for (int i = 1; i < BIRDCOUNT; i++) {
+        if (birds[i].isActive) {
+            birds[i].col--;
+            if (birds[i].aniCounter == 8) {
+                if (birds[i].aniState != FBIRD3) {
+                    birds[i].aniState++;
+                } else {
+                    birds[i].aniState = FBIRD1;
+                }
+                birds[i].aniCounter = 0;
+            }
+            if (birds[i].col == 0) {
+                birds[i].isActive = 0;
+                matesGone++;
+            }
+            if((collision(birds[0].col, birds[0].row, birds[0].width,
+            birds[0].height, birds[i].col, birds[i].row, birds[i].width, birds[i].height))) {
+                birds[i].isActive = 0;
+                matesKissed++;
+            }
+            birds[i].aniCounter++;
+        }
+     }
+}
+
+//draw mates
+void drawMates() {
+    for(int i = 1; i < BIRDCOUNT; i++) {
+        if (birds[i].isActive) {
+            shadowOAM[i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | birds[i].row;
+            shadowOAM[i].attr1 = ATTR1_MEDIUM | birds[i].col;
+            shadowOAM[i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(birds[i].aniState * 4, 0 * 4);
+        } else {
+            shadowOAM[i].attr0 = ATTR0_HIDE;
+        }
+    }
+}
+
+//initializes lizard
+void initLizard() {
+    for(int i = 0; i < LIZARDCOUNT; i++) {
+        lizard[i].width = 32;
+        lizard[i].height = 32;
+        lizard[i].col = 240;
+        lizard[i].row = rand() % 200;
+        while((lizard[i].row > 120) || (lizard[i].row < 0)) {
+            lizard[i].row = rand() % 200;
+        }
+        lizard[i].isActive = 0;
+        lizard[i].aniState = L1;
+        lizard[i].aniCounter = 0;
+    }
+}
+
+//add lizard
+void addLizard() {
     if (level2 == 1) {
         if (lTimer == 100) {
             for (int i = 0; i < LIZARDCOUNT; i++) {
@@ -184,7 +272,6 @@ void updateGame() {
                                 fireball[j].isActive = 1;
                                 break;
                             }
-                            fTimer = 0;
                         }
                     }
                     break;
@@ -210,33 +297,10 @@ void updateGame() {
             lTimer = 0;
         }
     }
+}
 
-     //update mates position and aniState
-     for (int i = 1; i < BIRDCOUNT; i++) {
-        if (birds[i].isActive) {
-            birds[i].col--;
-            if (birds[i].aniCounter == 8) {
-                if (birds[i].aniState != FBIRD3) {
-                    birds[i].aniState++;
-                } else {
-                    birds[i].aniState = FBIRD1;
-                }
-                birds[i].aniCounter = 0;
-            }
-            if (birds[i].col == 0) {
-                birds[i].isActive = 0;
-                matesGone++;
-            }
-            if((collision(birds[0].col, birds[0].row, birds[0].width,
-            birds[0].height, birds[i].col, birds[i].row, birds[i].width, birds[i].height))) {
-                birds[i].isActive = 0;
-                matesKissed++;
-            }
-            birds[i].aniCounter++;
-        }
-     } 
-
-     //update lizards position and aniState
+//update lizards position and aniState
+void updateLizard() {
     for (int i = 0; i < LIZARDCOUNT; i++) {
         if (lizard[i].isActive) {
             if (level2) {
@@ -266,47 +330,12 @@ void updateGame() {
                 matesGone = 5;
             }
             lizard[i].aniCounter++;
-
-            //update fireball
-            if (level3) {
-                for(int j = 0; j < FIREBALLCOUNT; j++) {
-                    if (fireball[j].isActive) {
-                        if (fireball[j].col < 3) {
-                            fireball[j].isActive = 0;
-                        } else {
-                            fireball[j].col = fireball[j].col - 3;
-                        }
-                        if((collision(birds[0].col, birds[0].row, birds[0].width,
-                        birds[0].height, fireball[j].col, fireball[j].row, fireball[j].width, fireball[j].height))) {
-                            fireball[j].isActive = 0;
-                            matesGone = 5;
-                        }
-                    }
-                }
-            }
         }
     }
 }
 
-void drawGame() {
-
-    //draw Casanova
-    shadowOAM[0].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | birds[0].row;
-    shadowOAM[0].attr1 = ATTR1_MEDIUM | birds[0].col;
-    shadowOAM[0].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(birds[0].aniState * 4, 0 * 4);
-
-    //draw mates
-   for(int i = 1; i < BIRDCOUNT; i++) {
-        if (birds[i].isActive) {
-            shadowOAM[i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | birds[i].row;
-            shadowOAM[i].attr1 = ATTR1_MEDIUM | birds[i].col;
-            shadowOAM[i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(birds[i].aniState * 4, 0 * 4);
-        } else {
-            shadowOAM[i].attr0 = ATTR0_HIDE;
-        }
-    }
-
-    //draw lizards
+//draws lizard
+void drawLizard() {
     for (int i = 0; i < LIZARDCOUNT; i++) {
         if (lizard[i].isActive) {
             shadowOAM[4+i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | lizard[i].row;
@@ -316,8 +345,44 @@ void drawGame() {
             shadowOAM[4+i].attr0 = ATTR0_HIDE;
         }
     }
+}
 
-    //draw fireball
+//initializes fireball
+void initFireball() {
+     for (int j = 0; j < FIREBALLCOUNT; j++) {
+        fireball[j].col = 240;
+        fireball[j].row = rand() % 200;
+        while((fireball[j].row > 120) || (fireball[j].row < 0)) {
+            fireball[j].row = rand() % 200;
+        }
+        fireball[j].width = 16;
+        fireball[j].height = 16;
+        fireball[j].isActive = 0;
+    }
+}
+
+//update fireball
+void updateFireball() {
+    if (level3) {
+        for(int j = 0; j < FIREBALLCOUNT; j++) {
+            if (fireball[j].isActive) {
+                if (fireball[j].col < 3) {
+                    fireball[j].isActive = 0;
+                } else {
+                    fireball[j].col = fireball[j].col - 3;
+                }
+                if((collision(birds[0].col, birds[0].row, birds[0].width,
+                birds[0].height, fireball[j].col, fireball[j].row, fireball[j].width,fireball[j].height))) {
+                    fireball[j].isActive = 0;
+                    matesGone = 5;
+                }
+            }
+        }
+    }
+}
+
+//draws fireballs
+void drawFireball() {
     for (int i = 0; i < FIREBALLCOUNT; i++) {
         if (fireball[i].isActive) {
             shadowOAM[7+i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | fireball[i].row;
@@ -327,11 +392,4 @@ void drawGame() {
             shadowOAM[7+i].attr0 = ATTR0_HIDE;
         }
     }
-
-    waitForVBlank();
-
-    REG_BG1HOFF = hOff / 4;
-    REG_BG0HOFF = hOff / 2;
-
-    DMANow(3, shadowOAM, OAM, 512);
 }
