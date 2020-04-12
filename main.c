@@ -5,6 +5,8 @@
 #include "game.h"
 #include "pause.h"
 #include "lose.h"
+#include "level2.h"
+#include "level3.h"
 #include "spritesheet.h"
 #include "treetop.h"
 #include <stdlib.h>
@@ -28,12 +30,16 @@ void goToInstructions();
 void instructions();
 void goToLose();
 void lose();
+void goToLevel2();
+void level2State();
+void goToLevel3();
+void level3State();
 
 //Random Seed
 int seed;
 
 //States
-enum {START, GAME, PAUSE, INSTRUCTIONS, LOSE};
+enum {START, GAME, PAUSE, INSTRUCTIONS, LOSE, LEVEL2, LEVEL3};
 int state = 0;
 
 int main() {
@@ -62,6 +68,12 @@ int main() {
             break;
         case LOSE:
             lose();
+            break;
+        case LEVEL2:
+            level2State();
+            break;
+        case LEVEL3:
+            level3State();
             break;
         default:
             break;
@@ -149,6 +161,76 @@ void game() {
     if(matesGone == 5) {
         goToLose();
     }
+    if(initLevel2Change) {
+        //levelChangeTimer = 0;
+        goToLevel2();
+    }
+
+    if(initLevel3Change) {
+        goToLevel3();
+    }
+}
+
+//Sets up Level 2
+void goToLevel2() {
+
+    REG_BG0HOFF = 0;
+
+    REG_DISPCTL = MODE0 | BG0_ENABLE | SPRITE_ENABLE;
+    
+    REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(28) | BG_4BPP | BG_SIZE_LARGE;
+
+    DMANow(3, level2Pal, PALETTE, 16);
+    DMANow(3, level2Tiles, &CHARBLOCK[0], level2TilesLen / 2);
+    DMANow(3, level2Map, &SCREENBLOCK[28], 1024 * 4);
+
+    hideSprites();
+    DMANow(3, shadowOAM, OAM, spritesheetPalLen);
+
+    state = LEVEL2;
+
+}
+//level 2 state
+void level2State() {
+
+    levelChangeTimer++;
+
+    if(levelChangeTimer == 75000) {
+        initLevel2();
+        goToGame();
+    }
+
+}
+
+//Sets up Level 3
+void goToLevel3() {
+
+    REG_BG0HOFF = 0;
+
+    REG_DISPCTL = MODE0 | BG0_ENABLE | SPRITE_ENABLE;
+    
+    REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(28) | BG_4BPP | BG_SIZE_LARGE;
+
+    DMANow(3, level3Pal, PALETTE, 16);
+    DMANow(3, level3Tiles, &CHARBLOCK[0], level3TilesLen / 2);
+    DMANow(3, level3Map, &SCREENBLOCK[28], 1024 * 4);
+
+    hideSprites();
+    DMANow(3, shadowOAM, OAM, spritesheetPalLen);
+
+    state = LEVEL3;
+
+}
+//level 3 state
+void level3State() {
+
+    levelChangeTimer++;
+
+    if(levelChangeTimer == 100000) {
+        initLevel3();
+        goToGame();
+    }
+
 }
 
 //Sets up the Pause State

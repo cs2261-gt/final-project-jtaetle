@@ -115,6 +115,8 @@ int collision(int colA, int rowA, int widthA, int heightA, int colB, int rowB, i
 void initGame();
 void updateGame();
 void drawGame();
+void initLevel2();
+void initLevel3();
 void initCasanova();
 void updateCasanova();
 void drawCasanova();
@@ -163,7 +165,7 @@ typedef struct {
     int height;
     int isActive;
 } FIREBALL;
-# 65 "game.h"
+# 67 "game.h"
 int timer;
 
 
@@ -179,15 +181,18 @@ int matesGone;
 int activeLizard;
 
 
+int initLevel2Change;
+int initLevel3Change;
+
+
 int level2;
 int level3;
 
 
+int levelChangeTimer;
+
+
 int matesKissed;
-
-
-
-int isCheat;
 # 3 "game.c" 2
 # 1 "sky.h" 1
 # 22 "sky.h"
@@ -1459,7 +1464,7 @@ enum {L1, L2, L3};
 
 void initGame() {
 
-    hOff = 134;
+    hOff = 0;
 
     initCasanova();
 
@@ -1479,6 +1484,15 @@ void initGame() {
     fTimer = 0;
 
 
+    levelChangeTimer = 0;
+
+
+    initLevel2Change = 0;
+
+
+    initLevel3Change = 0;
+
+
     matesGone = 0;
 
 
@@ -1492,6 +1506,13 @@ void initGame() {
 
 void updateGame() {
 
+    if(level2) {
+        if (lTimer > 100) {
+            lTimer = 50;
+        }
+    }
+
+
     hOff++;
 
 
@@ -1499,16 +1520,6 @@ void updateGame() {
 
 
     lTimer++;
-
-
-   if (matesKissed == 10) {
-        level2 = 1;
-        if (lTimer > 100) {
-            lTimer = 50;
-        }
-    } else if (matesKissed == 20) {
-        level3 = 1;
-    }
 
     updateCasanova();
 
@@ -1542,7 +1553,31 @@ void drawGame() {
 }
 
 
+void initLevel2() {
+
+    initLevel2Change = 0;
+    levelChangeTimer = 0;
+    initCasanova();
+    initMates();
+    initLizard();
+    initFireball();
+
+}
+
+void initLevel3() {
+
+    initLevel3Change = 0;
+    levelChangeTimer = 0;
+    initCasanova();
+    initMates();
+    initLizard();
+    initFireball();
+
+}
+
+
 void initCasanova() {
+
     birds[0].width = 32;
     birds[0].height = 32;
     birds[0].col = 16;
@@ -1648,6 +1683,14 @@ void updateMates() {
             birds[0].height, birds[i].col, birds[i].row, birds[i].width, birds[i].height))) {
                 birds[i].isActive = 0;
                 matesKissed++;
+
+                if (matesKissed == 2) {
+                    initLevel2Change = 1;
+                    level2 = 1;
+                } else if (matesKissed == 4) {
+                    initLevel3Change = 1;
+                    level3 = 1;
+                }
             }
             birds[i].aniCounter++;
         }
@@ -1670,8 +1713,8 @@ void drawMates() {
 
 void initLizard() {
     for(int i = 0; i < 3; i++) {
-        lizard[i].width = 32;
-        lizard[i].height = 32;
+        lizard[i].width = 25 ;
+        lizard[i].height = 25;
         lizard[i].col = 240;
         lizard[i].row = rand() % 200;
         while((lizard[i].row > 120) || (lizard[i].row < 0)) {

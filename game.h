@@ -2,6 +2,8 @@
 void initGame();
 void updateGame();
 void drawGame();
+void initLevel2();
+void initLevel3();
 void initCasanova();
 void updateCasanova();
 void drawCasanova();
@@ -76,13 +78,16 @@ int matesGone;
 //last active lizard
 int activeLizard;
 
+//initialize Levels
+int initLevel2Change;
+int initLevel3Change;
+
 //Levels
 int level2;
 int level3;
 
+//level Change Timer
+int levelChangeTimer;
+
 //Keep track of mates kissed
 int matesKissed;
-
-//cheat
-
-int isCheat;

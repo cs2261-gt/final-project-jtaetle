@@ -145,6 +145,8 @@ extern const unsigned short skyPal[256];
 void initGame();
 void updateGame();
 void drawGame();
+void initLevel2();
+void initLevel3();
 void initCasanova();
 void updateCasanova();
 void drawCasanova();
@@ -193,7 +195,7 @@ typedef struct {
     int height;
     int isActive;
 } FIREBALL;
-# 65 "game.h"
+# 67 "game.h"
 int timer;
 
 
@@ -209,15 +211,18 @@ int matesGone;
 int activeLizard;
 
 
+int initLevel2Change;
+int initLevel3Change;
+
+
 int level2;
 int level3;
 
 
+int levelChangeTimer;
+
+
 int matesKissed;
-
-
-
-int isCheat;
 # 6 "main.c" 2
 # 1 "pause.h" 1
 # 22 "pause.h"
@@ -227,7 +232,7 @@ extern const unsigned short pauseTiles[1200];
 extern const unsigned short pauseMap[1024];
 
 
-extern const unsigned short pausePal[16];
+extern const unsigned short pausePal[256];
 # 7 "main.c" 2
 # 1 "lose.h" 1
 # 22 "lose.h"
@@ -239,13 +244,33 @@ extern const unsigned short loseMap[1024];
 
 extern const unsigned short losePal[256];
 # 8 "main.c" 2
+# 1 "level2.h" 1
+# 22 "level2.h"
+extern const unsigned short level2Tiles[464];
+
+
+extern const unsigned short level2Map[1024];
+
+
+extern const unsigned short level2Pal[256];
+# 9 "main.c" 2
+# 1 "level3.h" 1
+# 22 "level3.h"
+extern const unsigned short level3Tiles[496];
+
+
+extern const unsigned short level3Map[1024];
+
+
+extern const unsigned short level3Pal[256];
+# 10 "main.c" 2
 # 1 "spritesheet.h" 1
 # 21 "spritesheet.h"
 extern const unsigned short spritesheetTiles[16384];
 
 
 extern const unsigned short spritesheetPal[16];
-# 9 "main.c" 2
+# 11 "main.c" 2
 # 1 "treetop.h" 1
 # 22 "treetop.h"
 extern const unsigned short treetopTiles[3152];
@@ -255,7 +280,7 @@ extern const unsigned short treetopMap[2048];
 
 
 extern const unsigned short treetopPal[16];
-# 10 "main.c" 2
+# 12 "main.c" 2
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 1 3
 # 10 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 3
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/machine/ieeefp.h" 1 3
@@ -1064,7 +1089,7 @@ extern long double _strtold_r (struct _reent *, const char *restrict, char **res
 extern long double strtold (const char *restrict, char **restrict);
 # 336 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 3
 
-# 11 "main.c" 2
+# 13 "main.c" 2
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdio.h" 1 3
 # 36 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdio.h" 3
 # 1 "/opt/devkitpro/devkitARM/lib/gcc/arm-none-eabi/9.1.0/include/stddef.h" 1 3 4
@@ -1475,11 +1500,11 @@ _putchar_unlocked(int _c)
 }
 # 797 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdio.h" 3
 
-# 12 "main.c" 2
+# 14 "main.c" 2
 
 
 
-# 14 "main.c"
+# 16 "main.c"
 void initialize();
 
 
@@ -1497,12 +1522,16 @@ void goToInstructions();
 void instructions();
 void goToLose();
 void lose();
+void goToLevel2();
+void level2State();
+void goToLevel3();
+void level3State();
 
 
 int seed;
 
 
-enum {START, GAME, PAUSE, INSTRUCTIONS, LOSE};
+enum {START, GAME, PAUSE, INSTRUCTIONS, LOSE, LEVEL2, LEVEL3};
 int state = 0;
 
 int main() {
@@ -1531,6 +1560,12 @@ int main() {
             break;
         case LOSE:
             lose();
+            break;
+        case LEVEL2:
+            level2State();
+            break;
+        case LEVEL3:
+            level3State();
             break;
         default:
             break;
@@ -1618,6 +1653,76 @@ void game() {
     if(matesGone == 5) {
         goToLose();
     }
+    if(initLevel2Change) {
+
+        goToLevel2();
+    }
+
+    if(initLevel3Change) {
+        goToLevel3();
+    }
+}
+
+
+void goToLevel2() {
+
+    (*(volatile unsigned short *)0x04000010) = 0;
+
+    (*(unsigned short *)0x4000000) = 0 | (1<<8) | (1<<12);
+
+    (*(volatile unsigned short*)0x4000008) = ((0)<<2) | ((28)<<8) | (0<<7) | (3<<14);
+
+    DMANow(3, level2Pal, ((unsigned short *)0x5000000), 16);
+    DMANow(3, level2Tiles, &((charblock *)0x6000000)[0], 928 / 2);
+    DMANow(3, level2Map, &((screenblock *)0x6000000)[28], 1024 * 4);
+
+    hideSprites();
+    DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 32);
+
+    state = LEVEL2;
+
+}
+
+void level2State() {
+
+    levelChangeTimer++;
+
+    if(levelChangeTimer == 75000) {
+        initLevel2();
+        goToGame();
+    }
+
+}
+
+
+void goToLevel3() {
+
+    (*(volatile unsigned short *)0x04000010) = 0;
+
+    (*(unsigned short *)0x4000000) = 0 | (1<<8) | (1<<12);
+
+    (*(volatile unsigned short*)0x4000008) = ((0)<<2) | ((28)<<8) | (0<<7) | (3<<14);
+
+    DMANow(3, level3Pal, ((unsigned short *)0x5000000), 16);
+    DMANow(3, level3Tiles, &((charblock *)0x6000000)[0], 992 / 2);
+    DMANow(3, level3Map, &((screenblock *)0x6000000)[28], 1024 * 4);
+
+    hideSprites();
+    DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 32);
+
+    state = LEVEL3;
+
+}
+
+void level3State() {
+
+    levelChangeTimer++;
+
+    if(levelChangeTimer == 100000) {
+        initLevel3();
+        goToGame();
+    }
+
 }
 
 

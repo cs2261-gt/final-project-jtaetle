@@ -26,7 +26,7 @@ enum {L1, L2, L3};
 
 void initGame() {
 
-    hOff = 134;
+    hOff = 0;
 
     initCasanova();
 
@@ -45,6 +45,15 @@ void initGame() {
     //initialize fireball timer
     fTimer = 0;
 
+    //initialize level timer
+    levelChangeTimer = 0;
+
+    //initialize level 2 change
+    initLevel2Change = 0;
+
+    //initialize level 3 changes
+    initLevel3Change = 0;
+
     //initialize matesGone
     matesGone = 0;
 
@@ -58,6 +67,13 @@ void initGame() {
 }
 
 void updateGame() {
+    //check to see if lizard time change needed
+    if(level2) {
+        if (lTimer > 100) {
+            lTimer = 50;
+        }
+    }
+
     //update background parallax
     hOff++;
 
@@ -66,16 +82,6 @@ void updateGame() {
 
     //update lizard timer
     lTimer++;
-
-    //check if level needs to change
-   if (matesKissed == 10) {
-        level2 = 1;
-        if (lTimer > 100) {
-            lTimer = 50;
-        }
-    } else if (matesKissed == 20) {
-        level3 = 1;
-    }
 
     updateCasanova();
 
@@ -108,8 +114,32 @@ void drawGame() {
     DMANow(3, shadowOAM, OAM, 512);
 }
 
+//initialize level2
+void initLevel2() {
+
+    initLevel2Change = 0;
+    levelChangeTimer = 0;
+    initCasanova();
+    initMates();
+    initLizard();
+    initFireball();
+
+}
+
+void initLevel3() {
+
+    initLevel3Change = 0;
+    levelChangeTimer = 0;
+    initCasanova();
+    initMates();
+    initLizard();
+    initFireball();
+
+}
+
 //initializes casanova
 void initCasanova() {
+
     birds[0].width = 32;
     birds[0].height = 32;
     birds[0].col = 16;
@@ -215,6 +245,14 @@ void updateMates() {
             birds[0].height, birds[i].col, birds[i].row, birds[i].width, birds[i].height))) {
                 birds[i].isActive = 0;
                 matesKissed++;
+                //check to see if need to change level
+                if (matesKissed == 2) {
+                    initLevel2Change = 1;
+                    level2 = 1;
+                } else if (matesKissed == 4) {
+                    initLevel3Change = 1;
+                    level3 = 1;
+                }
             }
             birds[i].aniCounter++;
         }
@@ -237,8 +275,8 @@ void drawMates() {
 //initializes lizard
 void initLizard() {
     for(int i = 0; i < LIZARDCOUNT; i++) {
-        lizard[i].width = 32;
-        lizard[i].height = 32;
+        lizard[i].width = 25               ;
+        lizard[i].height = 25;
         lizard[i].col = 240;
         lizard[i].row = rand() % 200;
         while((lizard[i].row > 120) || (lizard[i].row < 0)) {
