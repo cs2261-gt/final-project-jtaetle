@@ -18,6 +18,9 @@ LIZARD lizard[LIZARDCOUNT];
 //Fireball Pooling
 FIREBALL fireball[FIREBALLCOUNT];
 
+//Heart Pooling
+HEART heart[HEARTCOUNT];
+
 //Bird Animation State
 enum {CBIRD1, CBIRD2, CBIRD3, FBIRD1, FBIRD2, FBIRD3};
 
@@ -35,6 +38,8 @@ void initGame() {
     initLizard();
 
     initFireball();
+
+    initHeart();
 
     //initialize timer
     timer = 95;
@@ -94,6 +99,8 @@ void updateGame() {
     updateLizard();
 
     updateFireball();
+
+    updateHeart();
 }
 
 void drawGame() {
@@ -106,6 +113,8 @@ void drawGame() {
 
     drawFireball();
 
+    drawHeart();
+
     waitForVBlank();
 
     REG_BG1HOFF = hOff / 4;
@@ -116,30 +125,35 @@ void drawGame() {
 
 //initialize level2
 void initLevel2() {
-
     initLevel2Change = 0;
     levelChangeTimer = 0;
+
     initCasanova();
+
     initMates();
+
     initLizard();
+
     initFireball();
 
 }
 
 void initLevel3() {
-
     initLevel3Change = 0;
     levelChangeTimer = 0;
+
     initCasanova();
+
     initMates();
+
     initLizard();
+
     initFireball();
 
 }
 
 //initializes casanova
 void initCasanova() {
-
     birds[0].width = 32;
     birds[0].height = 32;
     birds[0].col = 16;
@@ -246,10 +260,10 @@ void updateMates() {
                 birds[i].isActive = 0;
                 matesKissed++;
                 //check to see if need to change level
-                if (matesKissed == 2) {
+                if (matesKissed == 10) {
                     initLevel2Change = 1;
                     level2 = 1;
-                } else if (matesKissed == 4) {
+                } else if (matesKissed == 20) {
                     initLevel3Change = 1;
                     level3 = 1;
                 }
@@ -366,7 +380,7 @@ void updateLizard() {
             if((collision(birds[0].col, birds[0].row, birds[0].width,
             birds[0].height, lizard[i].col, lizard[i].row, lizard[i].width, lizard[i].height))) {
                 lizard[i].isActive = 0;
-                matesGone = 5;
+                matesGone++;
             }
             lizard[i].aniCounter++;
         }
@@ -413,7 +427,7 @@ void updateFireball() {
                 if((collision(birds[0].col, birds[0].row, birds[0].width,
                 birds[0].height, fireball[j].col, fireball[j].row, fireball[j].width,fireball[j].height))) {
                     fireball[j].isActive = 0;
-                    matesGone = 5;
+                    matesGone++;
                 }
             }
         }
@@ -431,4 +445,40 @@ void drawFireball() {
             shadowOAM[7+i].attr0 = ATTR0_HIDE;
         }
     }
+}
+
+//initialize hearts
+void initHeart() {
+    for (int i = 0; i < HEARTCOUNT; i++){ 
+        heart[i].col = 16*i;
+        heart[i].row = 145;
+        heart[i].width = 16;
+        heart[i].height = 16;
+        heart[i].isActive = 1;
+    }
+}
+
+//update hearts
+void updateHeart() {
+    for (int i = HEARTCOUNT - 1; i > ((HEARTCOUNT - 1) - matesGone); i--){ 
+        if (heart[i].isActive) {
+            heart[i].isActive = 0;   
+        }
+    }
+}
+
+//draw hearts
+void drawHeart() {
+     for (int i = 0; i < HEARTCOUNT; i++) {
+        if (heart[i].isActive) {
+            shadowOAM[15+i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | heart[i].row;
+            shadowOAM[15+i].attr1 = ATTR1_SMALL | heart[i].col;
+            shadowOAM[15+i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(12, 4);
+        } else {
+            shadowOAM[15+i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | heart[i].row;
+            shadowOAM[15+i].attr1 = ATTR1_SMALL | heart[i].col;
+            shadowOAM[15+i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(14, 4);
+        }
+    }
+
 }

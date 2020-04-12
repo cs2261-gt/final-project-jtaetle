@@ -122,7 +122,8 @@ void start() {
 
 //Sets up the Game State
 void goToGame() {
-
+    REG_BG0HOFF = 0;
+    REG_BG1HOFF = 0;
     //initializes sky
     REG_DISPCTL = MODE0 | BG0_ENABLE | BG1_ENABLE | SPRITE_ENABLE;
 
@@ -162,7 +163,6 @@ void game() {
         goToLose();
     }
     if(initLevel2Change) {
-        //levelChangeTimer = 0;
         goToLevel2();
     }
 
@@ -185,7 +185,7 @@ void goToLevel2() {
     DMANow(3, level2Map, &SCREENBLOCK[28], 1024 * 4);
 
     hideSprites();
-    DMANow(3, shadowOAM, OAM, spritesheetPalLen);
+    DMANow(3, shadowOAM, OAM, 512);
 
     state = LEVEL2;
 
@@ -195,7 +195,7 @@ void level2State() {
 
     levelChangeTimer++;
 
-    if(levelChangeTimer == 75000) {
+    if(levelChangeTimer == 100000) {
         initLevel2();
         goToGame();
     }
@@ -216,7 +216,7 @@ void goToLevel3() {
     DMANow(3, level3Map, &SCREENBLOCK[28], 1024 * 4);
 
     hideSprites();
-    DMANow(3, shadowOAM, OAM, spritesheetPalLen);
+    DMANow(3, shadowOAM, OAM, 512);
 
     state = LEVEL3;
 

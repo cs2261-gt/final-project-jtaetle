@@ -161,6 +161,9 @@ void drawLizard();
 void initFireball();
 void updateFireball();
 void drawFireball();
+void initHeart();
+void updateHeart();
+void drawHeart();
 
 
 unsigned short hOff;
@@ -195,7 +198,16 @@ typedef struct {
     int height;
     int isActive;
 } FIREBALL;
-# 67 "game.h"
+
+
+typedef struct {
+    int row;
+ int col;
+ int width;
+    int height;
+    int isActive;
+} HEART;
+# 82 "game.h"
 int timer;
 
 
@@ -1614,7 +1626,8 @@ void start() {
 
 
 void goToGame() {
-
+    (*(volatile unsigned short *)0x04000010) = 0;
+    (*(volatile unsigned short *)0x04000014) = 0;
 
     (*(unsigned short *)0x4000000) = 0 | (1<<8) | (1<<9) | (1<<12);
 
@@ -1654,7 +1667,6 @@ void game() {
         goToLose();
     }
     if(initLevel2Change) {
-
         goToLevel2();
     }
 
@@ -1677,7 +1689,7 @@ void goToLevel2() {
     DMANow(3, level2Map, &((screenblock *)0x6000000)[28], 1024 * 4);
 
     hideSprites();
-    DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 32);
+    DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 512);
 
     state = LEVEL2;
 
@@ -1687,7 +1699,7 @@ void level2State() {
 
     levelChangeTimer++;
 
-    if(levelChangeTimer == 75000) {
+    if(levelChangeTimer == 100000) {
         initLevel2();
         goToGame();
     }
@@ -1708,7 +1720,7 @@ void goToLevel3() {
     DMANow(3, level3Map, &((screenblock *)0x6000000)[28], 1024 * 4);
 
     hideSprites();
-    DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 32);
+    DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 512);
 
     state = LEVEL3;
 

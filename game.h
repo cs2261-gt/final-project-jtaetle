@@ -18,6 +18,9 @@ void drawLizard();
 void initFireball();
 void updateFireball();
 void drawFireball();
+void initHeart();
+void updateHeart();
+void drawHeart();
 
 //Horizontal Offset
 unsigned short hOff;
@@ -53,6 +56,15 @@ typedef struct {
     int isActive;
 } FIREBALL;
 
+//Heart Struct
+typedef struct {
+    int row;
+	int col;
+	int width;
+    int height;
+    int isActive;
+} HEART;
+
 
 //Count of birds
 #define BIRDCOUNT 4
@@ -62,6 +74,9 @@ typedef struct {
 
 //Count of fireballs
 #define FIREBALLCOUNT 9
+
+//Count of hearts
+#define HEARTCOUNT 5
 
 //timer for new mate
 int timer;

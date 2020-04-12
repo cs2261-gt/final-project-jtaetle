@@ -131,6 +131,9 @@ void drawLizard();
 void initFireball();
 void updateFireball();
 void drawFireball();
+void initHeart();
+void updateHeart();
+void drawFireball();
 
 
 unsigned short hOff;
@@ -165,7 +168,16 @@ typedef struct {
     int height;
     int isActive;
 } FIREBALL;
-# 67 "game.h"
+
+
+typedef struct {
+    int row;
+ int col;
+ int width;
+    int height;
+    int isActive;
+} HEART;
+# 82 "game.h"
 int timer;
 
 
@@ -1457,6 +1469,9 @@ LIZARD lizard[3];
 FIREBALL fireball[9];
 
 
+HEART heart[5];
+
+
 enum {CBIRD1, CBIRD2, CBIRD3, FBIRD1, FBIRD2, FBIRD3};
 
 
@@ -1473,6 +1488,8 @@ void initGame() {
     initLizard();
 
     initFireball();
+
+    initHeart();
 
 
     timer = 95;
@@ -1532,6 +1549,8 @@ void updateGame() {
     updateLizard();
 
     updateFireball();
+
+    updateHeart();
 }
 
 void drawGame() {
@@ -1544,6 +1563,8 @@ void drawGame() {
 
     drawFireball();
 
+    drawHeart();
+
     waitForVBlank();
 
     (*(volatile unsigned short *)0x04000014) = hOff / 4;
@@ -1554,30 +1575,35 @@ void drawGame() {
 
 
 void initLevel2() {
-
     initLevel2Change = 0;
     levelChangeTimer = 0;
+
     initCasanova();
+
     initMates();
+
     initLizard();
+
     initFireball();
 
 }
 
 void initLevel3() {
-
     initLevel3Change = 0;
     levelChangeTimer = 0;
+
     initCasanova();
+
     initMates();
+
     initLizard();
+
     initFireball();
 
 }
 
 
 void initCasanova() {
-
     birds[0].width = 32;
     birds[0].height = 32;
     birds[0].col = 16;
@@ -1684,10 +1710,10 @@ void updateMates() {
                 birds[i].isActive = 0;
                 matesKissed++;
 
-                if (matesKissed == 2) {
+                if (matesKissed == 10) {
                     initLevel2Change = 1;
                     level2 = 1;
-                } else if (matesKissed == 4) {
+                } else if (matesKissed == 20) {
                     initLevel3Change = 1;
                     level3 = 1;
                 }
@@ -1804,7 +1830,7 @@ void updateLizard() {
             if((collision(birds[0].col, birds[0].row, birds[0].width,
             birds[0].height, lizard[i].col, lizard[i].row, lizard[i].width, lizard[i].height))) {
                 lizard[i].isActive = 0;
-                matesGone = 5;
+                matesGone++;
             }
             lizard[i].aniCounter++;
         }
@@ -1851,7 +1877,7 @@ void updateFireball() {
                 if((collision(birds[0].col, birds[0].row, birds[0].width,
                 birds[0].height, fireball[j].col, fireball[j].row, fireball[j].width,fireball[j].height))) {
                     fireball[j].isActive = 0;
-                    matesGone = 5;
+                    matesGone++;
                 }
             }
         }
@@ -1869,4 +1895,40 @@ void drawFireball() {
             shadowOAM[7+i].attr0 = (2<<8);
         }
     }
+}
+
+
+void initHeart() {
+    for (int i = 0; i < 5; i++){
+        heart[i].col = 16*i;
+        heart[i].row = 145;
+        heart[i].width = 16;
+        heart[i].height = 16;
+        heart[i].isActive = 1;
+    }
+}
+
+
+void updateHeart() {
+    for (int i = 5 - 1; i > ((5 - 1) - matesGone); i--){
+        if (heart[i].isActive) {
+            heart[i].isActive = 0;
+        }
+    }
+}
+
+
+void drawHeart() {
+     for (int i = 0; i < 5; i++) {
+        if (heart[i].isActive) {
+            shadowOAM[15+i].attr0 = (0<<8) | (0<<13) | (0<<14) | heart[i].row;
+            shadowOAM[15+i].attr1 = (1<<14) | heart[i].col;
+            shadowOAM[15+i].attr2 = ((0)<<12) | ((4)*32+(12));
+        } else {
+            shadowOAM[15+i].attr0 = (0<<8) | (0<<13) | (0<<14) | heart[i].row;
+            shadowOAM[15+i].attr1 = (1<<14) | heart[i].col;
+            shadowOAM[15+i].attr2 = ((0)<<12) | ((4)*32+(14));
+        }
+    }
+
 }

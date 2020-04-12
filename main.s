@@ -94,10 +94,13 @@ goToGame:
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, r5, r6, lr}
-	mov	r2, #4864
+	mov	r2, #0
 	mov	r5, #67108864
+	mov	r3, #4864
 	ldr	r4, .L12
-	strh	r2, [r5]	@ movhi
+	strh	r2, [r5, #16]	@ movhi
+	strh	r3, [r5]	@ movhi
+	strh	r2, [r5, #20]	@ movhi
 	mov	r3, #256
 	mov	r2, #83886080
 	mov	r0, #3
@@ -237,7 +240,7 @@ goToLevel2:
 	ldr	r3, .L23+20
 	mov	lr, pc
 	bx	r3
-	mov	r3, #32
+	mov	r3, #512
 	mov	r2, #117440512
 	mov	r0, #3
 	ldr	r1, .L23+24
@@ -287,7 +290,7 @@ level2State:
 	.align	2
 .L30:
 	.word	levelChangeTimer
-	.word	75000
+	.word	100000
 	.word	initLevel2
 	.size	level2State, .-level2State
 	.align	2
@@ -330,7 +333,7 @@ goToLevel3:
 	ldr	r3, .L34+20
 	mov	lr, pc
 	bx	r3
-	mov	r3, #32
+	mov	r3, #512
 	mov	r2, #117440512
 	mov	r0, #3
 	ldr	r1, .L34+24
