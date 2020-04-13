@@ -122,13 +122,13 @@ extern const unsigned short startPal[256];
 # 3 "main.c" 2
 # 1 "instructions.h" 1
 # 22 "instructions.h"
-extern const unsigned short instructionsTiles[6032];
+extern const unsigned short instructionsTiles[6640];
 
 
 extern const unsigned short instructionsMap[1024];
 
 
-extern const unsigned short instructionsPal[16];
+extern const unsigned short instructionsPal[256];
 # 4 "main.c" 2
 # 1 "sky.h" 1
 # 22 "sky.h"
@@ -1751,7 +1751,7 @@ void goToPause() {
     DMANow(3, pauseMap, &((screenblock *)0x6000000)[28], 1024 * 4);
 
     hideSprites();
-    DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 32);
+    DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 512);
     state = PAUSE;
 }
 
@@ -1765,7 +1765,7 @@ void pause() {
 
 void goToInstructions() {
     DMANow(3, instructionsPal, ((unsigned short *)0x5000000), 16);
-    DMANow(3, instructionsTiles, &((charblock *)0x6000000)[0], 12064 / 2);
+    DMANow(3, instructionsTiles, &((charblock *)0x6000000)[0], 13280 / 2);
     DMANow(3, instructionsMap, &((screenblock *)0x6000000)[28], 1024 * 4);
 
     state = INSTRUCTIONS;

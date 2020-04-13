@@ -1,3 +1,21 @@
+/*
+Milestone03:
+
+Done: complete gameplay and sprites (minus the orb for the cheat), all states, a level 2
+and a level 3 with splash screen transitions. In Level 2, there are more lizards and they
+are faster. In Level 3, the lizards have fireballs. 3 animated sprite types (lizard, mates,
+and Casanova). Hearts in the bottom left to symbolize lives.
+
+TODO: The cheat, the orb sprite for the cheat, music, cleaning up some of the sprites and
+backgrounds.
+
+To play the game: Follow the instructions! There are also instructions for what to do on each
+screen if applicable.
+
+Bugs: TBD! I havent found any yet. I do think the collisions (especially Casanova + lizard) need
+to be cleaner but im working on that.
+
+*/
 #include "myLib.h"
 #include "start.h"
 #include "instructions.h"
@@ -247,7 +265,7 @@ void goToPause() {
     DMANow(3, pauseMap, &SCREENBLOCK[28], 1024 * 4);
 
     hideSprites();
-    DMANow(3, shadowOAM, OAM, spritesheetPalLen);
+    DMANow(3, shadowOAM, OAM, 512);
     state = PAUSE;
 }
 

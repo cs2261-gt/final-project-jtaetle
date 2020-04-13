@@ -426,7 +426,7 @@ goToPause:
 	ldr	r3, .L45+20
 	mov	lr, pc
 	bx	r3
-	mov	r3, #32
+	mov	r3, #512
 	mov	r2, #117440512
 	mov	r0, #3
 	ldr	r1, .L45+24
@@ -515,7 +515,7 @@ goToInstructions:
 .L56:
 	.word	DMANow
 	.word	instructionsPal
-	.word	6032
+	.word	6640
 	.word	instructionsTiles
 	.word	100720640
 	.word	instructionsMap
