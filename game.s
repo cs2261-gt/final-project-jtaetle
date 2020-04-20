@@ -441,7 +441,7 @@ updateMates:
 	.word	level2
 	.word	level3
 	.word	matesGone
-	.word	22136
+	.word	7273
 	.word	playSoundB
 	.word	missedMate
 	.size	updateMates, .-updateMates

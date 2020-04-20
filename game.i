@@ -255,7 +255,7 @@ void stopSound();
 
 
 
-extern const signed char missedMate[22136];
+extern const signed char missedMate[7273];
 # 8 "game.c" 2
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 1 3
 # 10 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 3
@@ -1728,7 +1728,7 @@ void updateMates() {
             if (birds[i].col == 0) {
                 birds[i].isActive = 0;
                 matesGone++;
-                playSoundB(missedMate, 22136,0);
+                playSoundB(missedMate, 7273, 0);
             }
             if((collision(birds[0].col, birds[0].row, birds[0].width,
             birds[0].height, birds[i].col, birds[i].row, birds[i].width, birds[i].height))) {

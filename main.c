@@ -4,11 +4,13 @@ Milestone04:
 Done: complete gameplay and sprites (minus the orb for the cheat), all states, a level 2
 and a level 3 with splash screen transitions. In Level 2, there are more lizards and they
 are faster. In Level 3, the lizards have fireballs. 3 animated sprite types (lizard, mates,
-and Casanova). Hearts in the bottom left to symbolize lives. Intro sound, game sound, and 
-sound for when you miss a mate is in!!
+and Casanova). Hearts in the bottom left to symbolize lives. Start sound, game sound, and 
+sound for when you miss a mate!! Both the Start and Game State Sounds loop after 30 seconds.
 
-TODO: The cheat, the orb sprite for the cheat, cleaning up some of the sprites and
-backgrounds.
+TODO: The cheat, which I think I want to be you press a button, an orb appears, then when you hit
+the orb all of the mates line up and the lizards disappear. I also need to do the orb sprite for the cheat,
+cleaning up some of the sprites and
+backgrounds, more music.
 
 To play the game: Follow the instructions! There are also instructions for what to do on each
 screen if applicable.
@@ -159,6 +161,7 @@ void start() {
 void goToGame() {
     REG_BG0HOFF = 0;
     REG_BG1HOFF = 0;
+
     //initializes sky
     REG_DISPCTL = MODE0 | BG0_ENABLE | BG1_ENABLE | SPRITE_ENABLE;
 

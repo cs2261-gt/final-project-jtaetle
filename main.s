@@ -61,7 +61,7 @@ goToStart:
 	.word	100720640
 	.word	startMap
 	.word	playSoundA
-	.word	2102976
+	.word	336081
 	.word	startSong
 	.word	.LANCHOR0
 	.size	goToStart, .-goToStart
@@ -596,7 +596,7 @@ start:
 	.word	buttons
 	.word	srand
 	.word	stopSound
-	.word	952416
+	.word	170114
 	.word	gameSong
 	.word	playSoundA
 	.word	initGame
@@ -640,7 +640,7 @@ instructions:
 	.word	oldButtons
 	.word	buttons
 	.word	stopSound
-	.word	952416
+	.word	170114
 	.word	gameSong
 	.word	playSoundA
 	.word	initGame
