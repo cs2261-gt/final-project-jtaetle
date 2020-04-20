@@ -17,8 +17,8 @@ screen if applicable.
 
 Bugs: TBD! I havent found any yet. I do think the collisions (especially Casanova + lizard) need
 to be cleaner but im working on that. Also, right now on level 3 each dragon only shoots one fireball.
-I figured out why its happening but i kind of like it, so i may keep it. Also, I don't like how long the missed
-mate sound is but im having trouble fixing that so any feedback on that would be greatly appreciated!!
+I figured out why its happening but i kind of like it, so i may keep it. Also, theres a weird clicking sound
+when my song repeats / after my missed mates sound.
 
 */
 #include "myLib.h"
