@@ -1,19 +1,22 @@
 /*
-Milestone03:
+Milestone04:
 
 Done: complete gameplay and sprites (minus the orb for the cheat), all states, a level 2
 and a level 3 with splash screen transitions. In Level 2, there are more lizards and they
 are faster. In Level 3, the lizards have fireballs. 3 animated sprite types (lizard, mates,
-and Casanova). Hearts in the bottom left to symbolize lives.
+and Casanova). Hearts in the bottom left to symbolize lives. Intro sound, game sound, and 
+sound for when you miss a mate is in!!
 
-TODO: The cheat, the orb sprite for the cheat, music, cleaning up some of the sprites and
+TODO: The cheat, the orb sprite for the cheat, cleaning up some of the sprites and
 backgrounds.
 
 To play the game: Follow the instructions! There are also instructions for what to do on each
 screen if applicable.
 
 Bugs: TBD! I havent found any yet. I do think the collisions (especially Casanova + lizard) need
-to be cleaner but im working on that.
+to be cleaner but im working on that. Also, right now on level 3 each dragon only shoots one fireball.
+I figured out why its happening but i kind of like it, so i may keep it. Also, I don't like how long the missed
+mate sound is but im having trouble fixing that so any feedback on that would be greatly appreciated!!
 
 */
 #include "myLib.h"
@@ -27,6 +30,9 @@ to be cleaner but im working on that.
 #include "level3.h"
 #include "spritesheet.h"
 #include "treetop.h"
+#include "startSong.h"
+#include "gameSong.h"
+#include "sound.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -55,6 +61,10 @@ void level3State();
 
 //Random Seed
 int seed;
+
+//Sound
+SOUND soundA;
+SOUND soundB;
 
 //States
 enum {START, GAME, PAUSE, INSTRUCTIONS, LOSE, LEVEL2, LEVEL3};
@@ -108,6 +118,9 @@ void initialize() {
 
     REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(28) | BG_4BPP | BG_SIZE_LARGE;
 
+    setupSounds();
+	setupInterrupts(); 
+
     goToStart();
 
     seed = 0;
@@ -118,6 +131,8 @@ void goToStart() {
     DMANow(3, startPal, PALETTE, 16);
     DMANow(3, startTiles, &CHARBLOCK[0], startTilesLen / 2);
     DMANow(3, startMap, &SCREENBLOCK[28], 1024 * 4);
+
+    playSoundA(startSong, STARTSONGLEN, 1);
     
     state = START;
 }
@@ -129,6 +144,8 @@ void start() {
 
     if(BUTTON_PRESSED(BUTTON_START)) {
         srand(seed);
+        stopSound();
+        playSoundA(gameSong, GAMESONGLEN, 1);
         initGame();
         goToGame();
     }
@@ -175,9 +192,11 @@ void game() {
     drawGame();
 
     if(BUTTON_PRESSED(BUTTON_START)) {
+        pauseSound();
         goToPause();
     }
     if(matesGone == 5) {
+        stopSound();
         goToLose();
     }
     if(initLevel2Change) {
@@ -272,6 +291,7 @@ void goToPause() {
 //pause state
 void pause() {
     if(BUTTON_PRESSED(BUTTON_START)) {
+        unpauseSound();
         goToGame();
     }
 }
@@ -288,6 +308,8 @@ void goToInstructions() {
 //instructions state
 void instructions() {
     if(BUTTON_PRESSED(BUTTON_START)) {
+        stopSound();
+        playSoundA(gameSong, GAMESONGLEN, 1);
         initGame();
         goToGame();
     }

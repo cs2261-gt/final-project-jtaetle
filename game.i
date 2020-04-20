@@ -133,7 +133,7 @@ void updateFireball();
 void drawFireball();
 void initHeart();
 void updateHeart();
-void drawFireball();
+void drawHeart();
 
 
 unsigned short hOff;
@@ -233,6 +233,30 @@ extern const unsigned short spritesheetTiles[16384];
 
 extern const unsigned short spritesheetPal[16];
 # 6 "game.c" 2
+# 1 "sound.h" 1
+SOUND soundA;
+SOUND soundB;
+
+
+
+void setupSounds();
+void playSoundA(const signed char* sound, int length, int loops);
+void playSoundB(const signed char* sound, int length, int loops);
+
+void setupInterrupts();
+void interruptHandler();
+
+void pauseSound();
+void unpauseSound();
+void stopSound();
+# 7 "game.c" 2
+# 1 "missedMate.h" 1
+
+
+
+
+extern const signed char missedMate[22136];
+# 8 "game.c" 2
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 1 3
 # 10 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 3
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/machine/ieeefp.h" 1 3
@@ -1041,7 +1065,7 @@ extern long double _strtold_r (struct _reent *, const char *restrict, char **res
 extern long double strtold (const char *restrict, char **restrict);
 # 336 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 3
 
-# 7 "game.c" 2
+# 9 "game.c" 2
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdio.h" 1 3
 # 36 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdio.h" 3
 # 1 "/opt/devkitpro/devkitARM/lib/gcc/arm-none-eabi/9.1.0/include/stddef.h" 1 3 4
@@ -1452,11 +1476,11 @@ _putchar_unlocked(int _c)
 }
 # 797 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdio.h" 3
 
-# 8 "game.c" 2
+# 10 "game.c" 2
 
 
 
-# 10 "game.c"
+# 12 "game.c"
 OBJ_ATTR shadowOAM[128];
 
 
@@ -1704,6 +1728,7 @@ void updateMates() {
             if (birds[i].col == 0) {
                 birds[i].isActive = 0;
                 matesGone++;
+                playSoundB(missedMate, 22136,0);
             }
             if((collision(birds[0].col, birds[0].row, birds[0].width,
             birds[0].height, birds[i].col, birds[i].row, birds[i].width, birds[i].height))) {

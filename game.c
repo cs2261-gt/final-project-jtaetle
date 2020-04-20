@@ -3,6 +3,8 @@
 #include "sky.h"
 #include "treetop.h"
 #include "spritesheet.h"
+#include "sound.h"
+#include "missedMate.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -254,6 +256,7 @@ void updateMates() {
             if (birds[i].col == 0) {
                 birds[i].isActive = 0;
                 matesGone++;
+                playSoundB(missedMate, MISSEDMATELEN,0);
             }
             if((collision(birds[0].col, birds[0].row, birds[0].width,
             birds[0].height, birds[i].col, birds[i].row, birds[i].width, birds[i].height))) {
