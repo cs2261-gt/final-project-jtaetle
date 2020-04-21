@@ -255,7 +255,7 @@ void stopSound();
 
 
 
-extern const signed char missedMate[7273];
+extern const signed char missedMate[5669];
 # 8 "game.c" 2
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 1 3
 # 10 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 3
@@ -1628,7 +1628,7 @@ void initLevel3() {
 
 
 void initCasanova() {
-    birds[0].width = 32;
+    birds[0].width = 24;
     birds[0].height = 32;
     birds[0].col = 16;
     birds[0].row = (160 / 2 - 16);
@@ -1678,8 +1678,8 @@ void drawCasanova(){
 
 void initMates() {
     for (int i = 1; i < 4; i++) {
-        birds[i].width = 32;
-        birds[i].height = 32;
+        birds[i].width = 22;
+        birds[i].height = 28;
         birds[i].col = 240;
         birds[i].row = rand() % 200;
         while((birds[i].row > 120) || birds[i].row < 0) {
@@ -1728,7 +1728,7 @@ void updateMates() {
             if (birds[i].col == 0) {
                 birds[i].isActive = 0;
                 matesGone++;
-                playSoundB(missedMate, 7273, 0);
+                playSoundB(missedMate, 5669, 0);
             }
             if((collision(birds[0].col, birds[0].row, birds[0].width,
             birds[0].height, birds[i].col, birds[i].row, birds[i].width, birds[i].height))) {
@@ -1764,8 +1764,8 @@ void drawMates() {
 
 void initLizard() {
     for(int i = 0; i < 3; i++) {
-        lizard[i].width = 25 ;
-        lizard[i].height = 25;
+        lizard[i].width = 28;
+        lizard[i].height = 26;
         lizard[i].col = 240;
         lizard[i].row = rand() % 200;
         while((lizard[i].row > 120) || (lizard[i].row < 0)) {

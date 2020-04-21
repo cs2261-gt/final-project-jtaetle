@@ -1737,6 +1737,8 @@ void goToLevel2() {
     hideSprites();
     DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 512);
 
+    pauseSound();
+
     state = LEVEL2;
 
 }
@@ -1746,6 +1748,7 @@ void level2State() {
     levelChangeTimer++;
 
     if(levelChangeTimer == 100000) {
+        unpauseSound();
         initLevel2();
         goToGame();
     }

@@ -164,20 +164,21 @@ initCasanova:
 	@ Function supports interworking.
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	str	lr, [sp, #-4]!
-	mov	r1, #32
-	mov	lr, #16
+	push	{r4, lr}
 	mov	r2, #0
-	mov	ip, #64
-	mov	r0, #1
+	mov	r4, #24
+	mov	lr, #32
+	mov	ip, #16
+	mov	r0, #64
+	mov	r1, #1
 	ldr	r3, .L29
-	stm	r3, {ip, lr}
-	str	r1, [r3, #8]
-	str	r1, [r3, #12]
-	str	r0, [r3, #24]
+	str	r4, [r3, #8]
+	str	lr, [r3, #12]
+	stm	r3, {r0, ip}
+	str	r1, [r3, #24]
 	str	r2, [r3, #16]
 	str	r2, [r3, #20]
-	ldr	lr, [sp], #4
+	pop	{r4, lr}
 	bx	lr
 .L30:
 	.align	2
@@ -273,16 +274,17 @@ initMates:
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, r5, r6, r7, r8, r9, r10, lr}
-	mov	r6, #32
-	mov	r8, #240
+	mov	r8, #22
+	mov	r7, #28
 	ldr	r9, .L53
 	ldr	r5, .L53+4
 	ldr	r4, .L53+8
-	add	r7, r9, #84
+	add	r6, r9, #84
 .L48:
-	str	r6, [r9, #36]
-	str	r6, [r9, #40]
-	str	r8, [r9, #32]
+	mov	r3, #240
+	str	r8, [r9, #36]
+	str	r7, [r9, #40]
+	str	r3, [r9, #32]
 .L52:
 	mov	lr, pc
 	bx	r5
@@ -301,7 +303,7 @@ initMates:
 	str	r3, [r9, #48]
 	str	r2, [r9, #44]
 	add	r9, r9, #28
-	cmp	r9, r7
+	cmp	r9, r6
 	bne	.L48
 	pop	{r4, r5, r6, r7, r8, r9, r10, lr}
 	bx	lr
@@ -441,7 +443,7 @@ updateMates:
 	.word	level2
 	.word	level3
 	.word	matesGone
-	.word	7273
+	.word	5669
 	.word	playSoundB
 	.word	missedMate
 	.size	updateMates, .-updateMates
@@ -497,16 +499,17 @@ initLizard:
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, r5, r6, r7, r8, r9, r10, lr}
-	mov	r6, #25
-	mov	r8, #240
+	mov	r8, #28
+	mov	r7, #26
 	ldr	r9, .L94
 	ldr	r5, .L94+4
 	ldr	r4, .L94+8
-	add	r7, r9, #84
+	add	r6, r9, #84
 .L89:
-	str	r6, [r9, #8]
-	str	r6, [r9, #12]
-	str	r8, [r9, #4]
+	mov	r3, #240
+	str	r8, [r9, #8]
+	str	r7, [r9, #12]
+	str	r3, [r9, #4]
 .L93:
 	mov	lr, pc
 	bx	r5
@@ -524,7 +527,7 @@ initLizard:
 	str	r3, [r9, #-4]
 	str	r3, [r9, #-12]
 	str	r3, [r9, #-8]
-	cmp	r9, r7
+	cmp	r9, r6
 	bne	.L89
 	pop	{r4, r5, r6, r7, r8, r9, r10, lr}
 	bx	lr
@@ -979,21 +982,22 @@ initLevel2:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	mov	r2, #0
 	push	{r4, lr}
-	mov	r1, #32
-	mov	lr, #16
-	mov	ip, #64
-	mov	r0, #1
+	mov	ip, #16
+	mov	lr, #32
+	mov	r0, #64
+	mov	r1, #1
+	mov	r4, #24
 	ldr	r3, .L193
 	str	r2, [r3]
 	ldr	r3, .L193+4
 	str	r2, [r3]
 	ldr	r3, .L193+8
-	stm	r3, {ip, lr}
+	str	r4, [r3, #8]
+	str	lr, [r3, #12]
+	stm	r3, {r0, ip}
 	str	r2, [r3, #16]
 	str	r2, [r3, #20]
-	str	r0, [r3, #24]
-	str	r1, [r3, #8]
-	str	r1, [r3, #12]
+	str	r1, [r3, #24]
 	bl	initMates
 	bl	initLizard
 	pop	{r4, lr}
@@ -1017,21 +1021,22 @@ initLevel3:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	mov	r2, #0
 	push	{r4, lr}
-	mov	r1, #32
-	mov	lr, #16
-	mov	ip, #64
-	mov	r0, #1
+	mov	ip, #16
+	mov	lr, #32
+	mov	r0, #64
+	mov	r1, #1
+	mov	r4, #24
 	ldr	r3, .L197
 	str	r2, [r3]
 	ldr	r3, .L197+4
 	str	r2, [r3]
 	ldr	r3, .L197+8
-	stm	r3, {ip, lr}
+	str	r4, [r3, #8]
+	str	lr, [r3, #12]
+	stm	r3, {r0, ip}
 	str	r2, [r3, #16]
 	str	r2, [r3, #20]
-	str	r0, [r3, #24]
-	str	r1, [r3, #8]
-	str	r1, [r3, #12]
+	str	r1, [r3, #24]
 	bl	initMates
 	bl	initLizard
 	pop	{r4, lr}
@@ -1055,19 +1060,19 @@ initGame:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, r5, r6, lr}
 	mov	r4, #0
-	mov	r2, #32
-	mov	r1, #64
+	mov	r0, #24
+	mov	r1, #32
+	mov	r2, #64
 	mov	r5, #16
 	mov	r6, #1
 	ldr	r3, .L203
 	strh	r4, [r3]	@ movhi
 	ldr	r3, .L203+4
-	str	r1, [r3]
-	str	r2, [r3, #8]
-	str	r2, [r3, #12]
+	stm	r3, {r2, r5}
+	str	r0, [r3, #8]
+	str	r1, [r3, #12]
 	str	r4, [r3, #16]
 	str	r4, [r3, #20]
-	str	r5, [r3, #4]
 	str	r6, [r3, #24]
 	bl	initMates
 	bl	initLizard

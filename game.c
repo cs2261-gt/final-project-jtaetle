@@ -156,7 +156,7 @@ void initLevel3() {
 
 //initializes casanova
 void initCasanova() {
-    birds[0].width = 32;
+    birds[0].width = 24;
     birds[0].height = 32;
     birds[0].col = 16;
     birds[0].row = (SCREENHEIGHT / 2 - 16);
@@ -206,8 +206,8 @@ void drawCasanova(){
 //initializes mates
 void initMates() {
     for (int i = 1; i < BIRDCOUNT; i++) {
-        birds[i].width = 32;
-        birds[i].height = 32;
+        birds[i].width = 22;
+        birds[i].height = 28;
         birds[i].col = 240;
         birds[i].row = rand() % 200;
         while((birds[i].row > 120) || birds[i].row < 0) {
@@ -292,8 +292,8 @@ void drawMates() {
 //initializes lizard
 void initLizard() {
     for(int i = 0; i < LIZARDCOUNT; i++) {
-        lizard[i].width = 25               ;
-        lizard[i].height = 25;
+        lizard[i].width = 28;
+        lizard[i].height = 26;
         lizard[i].col = 240;
         lizard[i].row = rand() % 200;
         while((lizard[i].row > 120) || (lizard[i].row < 0)) {
