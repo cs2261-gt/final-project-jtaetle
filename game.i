@@ -120,6 +120,7 @@ void initLevel3();
 void initCasanova();
 void updateCasanova();
 void drawCasanova();
+void drawCasanovaCheat();
 void initMates();
 void addMates();
 void updateMates();
@@ -177,7 +178,7 @@ typedef struct {
     int height;
     int isActive;
 } HEART;
-# 82 "game.h"
+# 83 "game.h"
 int timer;
 
 
@@ -205,6 +206,9 @@ int levelChangeTimer;
 
 
 int matesKissed;
+
+
+int isCheat;
 # 3 "game.c" 2
 # 1 "sky.h" 1
 # 22 "sky.h"
@@ -255,7 +259,7 @@ void stopSound();
 
 
 
-extern const signed char missedMate[5669];
+extern const signed char missedMate[2941];
 # 8 "game.c" 2
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 1 3
 # 10 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 3
@@ -1543,6 +1547,8 @@ void initGame() {
     level2 = 0;
     level3 = 0;
 
+
+    isCheat = 0;
 }
 
 void updateGame() {
@@ -1554,32 +1560,47 @@ void updateGame() {
     }
 
 
+    if((!(~(oldButtons)&((1<<0))) && (~buttons & ((1<<0))))) {
+        if(!(isCheat)){
+            isCheat++;
+        } else {
+            isCheat = 0;
+        }
+    }
+
     hOff++;
 
 
     timer++;
 
-
-    lTimer++;
-
     updateCasanova();
 
     addMates();
 
-    addLizard();
+    if (!(isCheat)) {
+
+        lTimer++;
+        addLizard();
+    }
 
     updateMates();
 
-    updateLizard();
+    if (!(isCheat)) {
+        updateLizard();
 
-    updateFireball();
+        updateFireball();
+    }
 
     updateHeart();
 }
 
 void drawGame() {
 
-    drawCasanova();
+    if(!(isCheat)) {
+        drawCasanova();
+    } else {
+        drawCasanovaCheat();
+    }
 
     drawMates();
 
@@ -1599,6 +1620,7 @@ void drawGame() {
 
 
 void initLevel2() {
+    hOff = 0;
     initLevel2Change = 0;
     levelChangeTimer = 0;
 
@@ -1613,6 +1635,7 @@ void initLevel2() {
 }
 
 void initLevel3() {
+    hOff = 0;
     initLevel3Change = 0;
     levelChangeTimer = 0;
 
@@ -1676,6 +1699,13 @@ void drawCasanova(){
 }
 
 
+void drawCasanovaCheat() {
+    shadowOAM[0].attr0 = (0<<8) | (0<<13) | (0<<14) | birds[0].row;
+    shadowOAM[0].attr1 = (2<<14) | birds[0].col;
+    shadowOAM[0].attr2 = ((0)<<12) | ((8)*32+(birds[0].aniState * 4));
+}
+
+
 void initMates() {
     for (int i = 1; i < 4; i++) {
         birds[i].width = 22;
@@ -1698,7 +1728,11 @@ void addMates() {
         for (int i = 1; i < 4; i++) {
             if (!birds[i].isActive) {
                 birds[i].col = 240;
-                birds[i].row = rand() % 200;
+                if (!(isCheat)) {
+                    birds[i].row = rand() % 200;
+                } else {
+                    birds[i].row = birds[0].row;
+                }
                 while((birds[i].row > 120) || birds[i].row < 0) {
                     birds[i].row = rand() % 200;
                 }
@@ -1717,6 +1751,9 @@ void updateMates() {
      for (int i = 1; i < 4; i++) {
         if (birds[i].isActive) {
             birds[i].col--;
+            if (isCheat) {
+                birds[i].row = birds[0].row;
+            }
             if (birds[i].aniCounter == 8) {
                 if (birds[i].aniState != FBIRD3) {
                     birds[i].aniState++;
@@ -1728,7 +1765,7 @@ void updateMates() {
             if (birds[i].col == 0) {
                 birds[i].isActive = 0;
                 matesGone++;
-                playSoundB(missedMate, 5669, 0);
+
             }
             if((collision(birds[0].col, birds[0].row, birds[0].width,
             birds[0].height, birds[i].col, birds[i].row, birds[i].width, birds[i].height))) {
@@ -1764,7 +1801,7 @@ void drawMates() {
 
 void initLizard() {
     for(int i = 0; i < 3; i++) {
-        lizard[i].width = 28;
+        lizard[i].width = 27;
         lizard[i].height = 26;
         lizard[i].col = 240;
         lizard[i].row = rand() % 200;
@@ -1856,6 +1893,7 @@ void updateLizard() {
             birds[0].height, lizard[i].col, lizard[i].row, lizard[i].width, lizard[i].height))) {
                 lizard[i].isActive = 0;
                 matesGone++;
+
             }
             lizard[i].aniCounter++;
         }
@@ -1865,7 +1903,7 @@ void updateLizard() {
 
 void drawLizard() {
     for (int i = 0; i < 3; i++) {
-        if (lizard[i].isActive) {
+        if ((lizard[i].isActive) && !(isCheat)) {
             shadowOAM[4+i].attr0 = (0<<8) | (0<<13) | (0<<14) | lizard[i].row;
             shadowOAM[4+i].attr1 = (2<<14) | lizard[i].col;
             shadowOAM[4+i].attr2 = ((0)<<12) | ((4)*32+(lizard[i].aniState * 4));
@@ -1903,6 +1941,7 @@ void updateFireball() {
                 birds[0].height, fireball[j].col, fireball[j].row, fireball[j].width,fireball[j].height))) {
                     fireball[j].isActive = 0;
                     matesGone++;
+
                 }
             }
         }
@@ -1912,7 +1951,7 @@ void updateFireball() {
 
 void drawFireball() {
     for (int i = 0; i < 9; i++) {
-        if (fireball[i].isActive) {
+        if ((fireball[i].isActive) &&!(isCheat)) {
             shadowOAM[7+i].attr0 = (0<<8) | (0<<13) | (0<<14) | fireball[i].row;
             shadowOAM[7+i].attr1 = (1<<14) | fireball[i].col;
             shadowOAM[7+i].attr2 = ((0)<<12) | ((6)*32+(12));
@@ -1937,6 +1976,7 @@ void initHeart() {
 void updateHeart() {
     for (int i = 5 - 1; i > ((5 - 1) - matesGone); i--){
         if (heart[i].isActive) {
+            playSoundB(missedMate, 2941, 0);
             heart[i].isActive = 0;
         }
     }

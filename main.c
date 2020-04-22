@@ -4,22 +4,19 @@ Milestone04:
 Done: complete gameplay and sprites (minus the orb for the cheat), all states, a level 2
 and a level 3 with splash screen transitions. In Level 2, there are more lizards and they
 are faster. In Level 3, the lizards have fireballs. 3 animated sprite types (lizard, mates,
-and Casanova). Hearts in the bottom left to symbolize lives. Start sound, game sound, and 
-sound for when you miss a mate!! Both the Start and Game State Sounds loop after 30 seconds.
+and Casanova). Hearts in the bottom left to symbolize lives. Start sound, game sound, and lose
+sound loop. I also have a non-looping sound for when you lose a life (except for the last life,
+which the game goes to the lose sound). Also, the cheat is done! Instructions tell you how to activate
+/ deactivate it.
 
-TODO: The cheat, which I think I want to be you press a button, an orb appears, then when you hit
-the orb all of the mates line up and the lizards disappear. I also need to do the orb sprite for the cheat,
-cleaning up some of the sprites and
-backgrounds, more music.
+TODO: I want to clean up the backgrounds and add more music.
 
 To play the game: Follow the instructions! There are also instructions for what to do on each
 screen if applicable.
 
-Bugs: TBD! I havent found any yet. I do think the collisions (especially Casanova + lizard) need
-to be cleaner but im working on that. Also, right now on level 3 each dragon only shoots one fireball.
-I figured out why its happening but i kind of like it, so i may keep it. Also, theres a weird clicking sound
-when my song repeats / after my missed mates sound.
-
+Bugs: Theres a weird clicking sound when my song repeats / after my lost life sound.
+I also don't know if I love the fact that the last lost life sound does not play; instead it just goes straight
+to the lose sound.
 */
 #include "myLib.h"
 #include "start.h"
@@ -34,6 +31,7 @@ when my song repeats / after my missed mates sound.
 #include "treetop.h"
 #include "startSong.h"
 #include "gameSong.h"
+#include "loseSong.h"
 #include "sound.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -80,8 +78,6 @@ int main() {
 
         oldButtons = buttons;
         buttons = BUTTONS;
-
-        //waitForVBlank();
 
         switch (state) {
         case START:
@@ -159,8 +155,6 @@ void start() {
 
 //Sets up the Game State
 void goToGame() {
-    REG_BG0HOFF = 0;
-    REG_BG1HOFF = 0;
 
     //initializes sky
     REG_DISPCTL = MODE0 | BG0_ENABLE | BG1_ENABLE | SPRITE_ENABLE;
@@ -186,6 +180,7 @@ void goToGame() {
 
     hideSprites();
     state = GAME;
+
 }
 
 //game state
@@ -200,6 +195,7 @@ void game() {
     }
     if(matesGone == 5) {
         stopSound();
+        playSoundA(loseSong, LOSESONGLEN, 1);
         goToLose();
     }
     if(initLevel2Change) {
@@ -227,8 +223,6 @@ void goToLevel2() {
     hideSprites();
     DMANow(3, shadowOAM, OAM, 512);
 
-    pauseSound();
-
     state = LEVEL2;
 
 }
@@ -238,7 +232,6 @@ void level2State() {
     levelChangeTimer++;
 
     if(levelChangeTimer == 100000) {
-        unpauseSound();
         initLevel2();
         goToGame();
     }

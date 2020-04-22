@@ -2,7 +2,7 @@
 # 1 "<built-in>"
 # 1 "<command-line>"
 # 1 "main.c"
-# 24 "main.c"
+# 21 "main.c"
 # 1 "myLib.h" 1
 
 
@@ -110,7 +110,7 @@ typedef struct{
 
 
 int collision(int colA, int rowA, int widthA, int heightA, int colB, int rowB, int widthB, int heightB);
-# 25 "main.c" 2
+# 22 "main.c" 2
 # 1 "start.h" 1
 # 22 "start.h"
 extern const unsigned short startTiles[3472];
@@ -120,17 +120,17 @@ extern const unsigned short startMap[1024];
 
 
 extern const unsigned short startPal[256];
-# 26 "main.c" 2
+# 23 "main.c" 2
 # 1 "instructions.h" 1
 # 22 "instructions.h"
-extern const unsigned short instructionsTiles[6640];
+extern const unsigned short instructionsTiles[6464];
 
 
 extern const unsigned short instructionsMap[1024];
 
 
-extern const unsigned short instructionsPal[256];
-# 27 "main.c" 2
+extern const unsigned short instructionsPal[16];
+# 24 "main.c" 2
 # 1 "sky.h" 1
 # 22 "sky.h"
 extern const unsigned short skyTiles[2592];
@@ -140,7 +140,7 @@ extern const unsigned short skyMap[1024];
 
 
 extern const unsigned short skyPal[256];
-# 28 "main.c" 2
+# 25 "main.c" 2
 # 1 "game.h" 1
 
 void initGame();
@@ -151,6 +151,7 @@ void initLevel3();
 void initCasanova();
 void updateCasanova();
 void drawCasanova();
+void drawCasanovaCheat();
 void initMates();
 void addMates();
 void updateMates();
@@ -208,7 +209,7 @@ typedef struct {
     int height;
     int isActive;
 } HEART;
-# 82 "game.h"
+# 83 "game.h"
 int timer;
 
 
@@ -236,7 +237,10 @@ int levelChangeTimer;
 
 
 int matesKissed;
-# 29 "main.c" 2
+
+
+int isCheat;
+# 26 "main.c" 2
 # 1 "pause.h" 1
 # 22 "pause.h"
 extern const unsigned short pauseTiles[1200];
@@ -246,7 +250,7 @@ extern const unsigned short pauseMap[1024];
 
 
 extern const unsigned short pausePal[256];
-# 30 "main.c" 2
+# 27 "main.c" 2
 # 1 "lose.h" 1
 # 22 "lose.h"
 extern const unsigned short loseTiles[1712];
@@ -256,7 +260,7 @@ extern const unsigned short loseMap[1024];
 
 
 extern const unsigned short losePal[256];
-# 31 "main.c" 2
+# 28 "main.c" 2
 # 1 "level2.h" 1
 # 22 "level2.h"
 extern const unsigned short level2Tiles[464];
@@ -266,7 +270,7 @@ extern const unsigned short level2Map[1024];
 
 
 extern const unsigned short level2Pal[256];
-# 32 "main.c" 2
+# 29 "main.c" 2
 # 1 "level3.h" 1
 # 22 "level3.h"
 extern const unsigned short level3Tiles[496];
@@ -276,14 +280,14 @@ extern const unsigned short level3Map[1024];
 
 
 extern const unsigned short level3Pal[256];
-# 33 "main.c" 2
+# 30 "main.c" 2
 # 1 "spritesheet.h" 1
 # 21 "spritesheet.h"
 extern const unsigned short spritesheetTiles[16384];
 
 
 extern const unsigned short spritesheetPal[16];
-# 34 "main.c" 2
+# 31 "main.c" 2
 # 1 "treetop.h" 1
 # 22 "treetop.h"
 extern const unsigned short treetopTiles[3152];
@@ -293,21 +297,28 @@ extern const unsigned short treetopMap[2048];
 
 
 extern const unsigned short treetopPal[16];
-# 35 "main.c" 2
+# 32 "main.c" 2
 # 1 "startSong.h" 1
 
 
 
 
 extern const signed char startSong[336081];
-# 36 "main.c" 2
+# 33 "main.c" 2
 # 1 "gameSong.h" 1
 
 
 
 
 extern const signed char gameSong[170114];
-# 37 "main.c" 2
+# 34 "main.c" 2
+# 1 "loseSong.h" 1
+
+
+
+
+extern const signed char loseSong[215998];
+# 35 "main.c" 2
 # 1 "sound.h" 1
 SOUND soundA;
 SOUND soundB;
@@ -324,7 +335,7 @@ void interruptHandler();
 void pauseSound();
 void unpauseSound();
 void stopSound();
-# 38 "main.c" 2
+# 36 "main.c" 2
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 1 3
 # 10 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 3
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/machine/ieeefp.h" 1 3
@@ -1133,7 +1144,7 @@ extern long double _strtold_r (struct _reent *, const char *restrict, char **res
 extern long double strtold (const char *restrict, char **restrict);
 # 336 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 3
 
-# 39 "main.c" 2
+# 37 "main.c" 2
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdio.h" 1 3
 # 36 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdio.h" 3
 # 1 "/opt/devkitpro/devkitARM/lib/gcc/arm-none-eabi/9.1.0/include/stddef.h" 1 3 4
@@ -1544,11 +1555,11 @@ _putchar_unlocked(int _c)
 }
 # 797 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdio.h" 3
 
-# 40 "main.c" 2
+# 38 "main.c" 2
 
 
 
-# 42 "main.c"
+# 40 "main.c"
 void initialize();
 
 
@@ -1590,8 +1601,6 @@ int main() {
 
         oldButtons = buttons;
         buttons = (*(volatile unsigned short *)0x04000130);
-
-
 
         switch (state) {
         case START:
@@ -1669,8 +1678,6 @@ void start() {
 
 
 void goToGame() {
-    (*(volatile unsigned short *)0x04000010) = 0;
-    (*(volatile unsigned short *)0x04000014) = 0;
 
 
     (*(unsigned short *)0x4000000) = 0 | (1<<8) | (1<<9) | (1<<12);
@@ -1696,6 +1703,7 @@ void goToGame() {
 
     hideSprites();
     state = GAME;
+
 }
 
 
@@ -1710,6 +1718,7 @@ void game() {
     }
     if(matesGone == 5) {
         stopSound();
+        playSoundA(loseSong, 215998, 1);
         goToLose();
     }
     if(initLevel2Change) {
@@ -1737,8 +1746,6 @@ void goToLevel2() {
     hideSprites();
     DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 512);
 
-    pauseSound();
-
     state = LEVEL2;
 
 }
@@ -1748,7 +1755,6 @@ void level2State() {
     levelChangeTimer++;
 
     if(levelChangeTimer == 100000) {
-        unpauseSound();
         initLevel2();
         goToGame();
     }
@@ -1815,7 +1821,7 @@ void pause() {
 
 void goToInstructions() {
     DMANow(3, instructionsPal, ((unsigned short *)0x5000000), 16);
-    DMANow(3, instructionsTiles, &((charblock *)0x6000000)[0], 13280 / 2);
+    DMANow(3, instructionsTiles, &((charblock *)0x6000000)[0], 12928 / 2);
     DMANow(3, instructionsMap, &((screenblock *)0x6000000)[28], 1024 * 4);
 
     state = INSTRUCTIONS;

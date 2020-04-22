@@ -111,13 +111,10 @@ goToGame:
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, r5, r6, lr}
-	mov	r2, #0
+	mov	r2, #4864
 	mov	r5, #67108864
-	mov	r3, #4864
 	ldr	r4, .L12
-	strh	r2, [r5, #16]	@ movhi
-	strh	r3, [r5]	@ movhi
-	strh	r2, [r5, #20]	@ movhi
+	strh	r2, [r5]	@ movhi
 	mov	r3, #256
 	mov	r2, #83886080
 	mov	r0, #3
@@ -257,17 +254,14 @@ goToLevel2:
 	ldr	r3, .L23+20
 	mov	lr, pc
 	bx	r3
-	mov	r2, #117440512
 	mov	r3, #512
+	mov	r2, #117440512
 	mov	r0, #3
 	ldr	r1, .L23+24
 	mov	lr, pc
 	bx	r4
-	ldr	r3, .L23+28
-	mov	lr, pc
-	bx	r3
 	mov	r2, #5
-	ldr	r3, .L23+32
+	ldr	r3, .L23+28
 	pop	{r4, lr}
 	str	r2, [r3]
 	bx	lr
@@ -281,7 +275,6 @@ goToLevel2:
 	.word	level2Map
 	.word	hideSprites
 	.word	shadowOAM
-	.word	pauseSound
 	.word	.LANCHOR0
 	.size	goToLevel2, .-goToLevel2
 	.align	2
@@ -305,9 +298,6 @@ level2State:
 	ldr	r3, .L30+8
 	mov	lr, pc
 	bx	r3
-	ldr	r3, .L30+12
-	mov	lr, pc
-	bx	r3
 	pop	{r4, lr}
 	b	goToGame
 .L31:
@@ -315,7 +305,6 @@ level2State:
 .L30:
 	.word	levelChangeTimer
 	.word	100000
-	.word	unpauseSound
 	.word	initLevel2
 	.size	level2State, .-level2State
 	.align	2
@@ -513,20 +502,20 @@ goToInstructions:
 	ldr	r1, .L53+4
 	mov	lr, pc
 	bx	r4
+	mov	r3, #6464
 	mov	r2, #100663296
 	mov	r0, #3
-	ldr	r3, .L53+8
-	ldr	r1, .L53+12
+	ldr	r1, .L53+8
 	mov	lr, pc
 	bx	r4
 	mov	r3, #4096
-	ldr	r2, .L53+16
+	ldr	r2, .L53+12
 	mov	r0, #3
-	ldr	r1, .L53+20
+	ldr	r1, .L53+16
 	mov	lr, pc
 	bx	r4
 	mov	r2, #3
-	ldr	r3, .L53+24
+	ldr	r3, .L53+20
 	pop	{r4, lr}
 	str	r2, [r3]
 	bx	lr
@@ -535,7 +524,6 @@ goToInstructions:
 .L53:
 	.word	DMANow
 	.word	instructionsPal
-	.word	6640
 	.word	instructionsTiles
 	.word	100720640
 	.word	instructionsMap
@@ -768,10 +756,16 @@ game:
 	ldr	r3, .L99+28
 	mov	lr, pc
 	bx	r3
+	mov	r2, #1
+	ldr	r1, .L99+32
+	ldr	r0, .L99+36
+	ldr	r3, .L99+40
+	mov	lr, pc
+	bx	r3
 	bl	goToLose
 	b	.L85
 .L95:
-	ldr	r3, .L99+32
+	ldr	r3, .L99+44
 	mov	lr, pc
 	bx	r3
 	bl	goToPause
@@ -787,6 +781,9 @@ game:
 	.word	initLevel2Change
 	.word	initLevel3Change
 	.word	stopSound
+	.word	215998
+	.word	loseSong
+	.word	playSoundA
 	.word	pauseSound
 	.size	game, .-game
 	.section	.text.startup,"ax",%progbits
@@ -801,24 +798,24 @@ main:
 	@ Volatile: function does not return.
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	ldr	r6, .L120
-	ldr	r8, .L120+4
 	push	{r4, r7, fp, lr}
-	ldr	r3, .L120+8
+	ldr	r6, .L119
+	ldr	r7, .L119+4
+	ldr	r3, .L119+8
 	mov	lr, pc
 	bx	r3
-	ldr	r5, .L120+12
+	ldr	r5, .L119+12
 	ldr	r2, [r6]
-	ldrh	r0, [r8]
-	ldr	fp, .L120+16
-	ldr	r10, .L120+20
-	ldr	r9, .L120+24
-	ldr	r7, .L120+28
-	ldr	r4, .L120+32
+	ldrh	r0, [r7]
+	ldr	fp, .L119+16
+	ldr	r10, .L119+20
+	ldr	r9, .L119+24
+	ldr	r8, .L119+28
+	ldr	r4, .L119+32
 .L103:
 	strh	r0, [r5]	@ movhi
 	ldrh	r3, [r4, #48]
-	strh	r3, [r8]	@ movhi
+	strh	r3, [r7]	@ movhi
 	cmp	r2, #6
 	ldrls	pc, [pc, r2, asl #2]
 	b	.L113
@@ -831,76 +828,63 @@ main:
 	.word	.L106
 	.word	.L104
 .L104:
-	ldr	r3, .L120+36
+	ldr	r3, .L119+36
 	mov	lr, pc
 	bx	r3
 	ldr	r2, [r6]
-	ldrh	r0, [r8]
+	ldrh	r0, [r7]
 	b	.L103
 .L106:
-	ldr	r1, [r7]
-	ldr	r0, .L120+40
-	add	r1, r1, #1
-	cmp	r1, r0
-	str	r1, [r7]
-	beq	.L119
-.L113:
-	mov	r0, r3
+	mov	lr, pc
+	bx	r8
+	ldr	r2, [r6]
+	ldrh	r0, [r7]
 	b	.L103
 .L107:
 	tst	r0, #8
 	beq	.L113
 	tst	r3, #8
-	bne	.L113
-	ldr	r3, .L120+44
-	mov	lr, pc
-	bx	r3
-	ldr	r2, [r6]
-	ldrh	r0, [r8]
+	beq	.L118
+.L113:
+	mov	r0, r3
 	b	.L103
 .L108:
 	mov	lr, pc
 	bx	r9
 	ldr	r2, [r6]
-	ldrh	r0, [r8]
+	ldrh	r0, [r7]
 	b	.L103
 .L109:
 	tst	r0, #8
 	beq	.L113
-	ldr	r3, .L120+48
+	ldr	r3, .L119+40
 	mov	lr, pc
 	bx	r3
 	ldr	r2, [r6]
-	ldrh	r0, [r8]
+	ldrh	r0, [r7]
 	b	.L103
 .L111:
 	mov	lr, pc
 	bx	fp
 	ldr	r2, [r6]
-	ldrh	r0, [r8]
+	ldrh	r0, [r7]
 	b	.L103
 .L110:
 	mov	lr, pc
 	bx	r10
 	ldr	r2, [r6]
-	ldrh	r0, [r8]
+	ldrh	r0, [r7]
 	b	.L103
-.L119:
-	ldr	r3, .L120+52
-	mov	lr, pc
-	bx	r3
-	ldr	r3, .L120+56
-	mov	lr, pc
-	bx	r3
-	ldr	r3, .L120+60
+.L118:
+	ldr	r3, .L119+44
 	mov	lr, pc
 	bx	r3
 	ldr	r2, [r6]
-	ldrh	r0, [r8]
+	ldrh	r0, [r7]
 	b	.L103
-.L121:
-	.align	2
 .L120:
+	.align	2
+.L119:
 	.word	.LANCHOR0
 	.word	buttons
 	.word	initialize
@@ -908,15 +892,11 @@ main:
 	.word	start
 	.word	game
 	.word	instructions
-	.word	levelChangeTimer
+	.word	level2State
 	.word	67109120
 	.word	level3State
-	.word	100000
-	.word	goToStart
 	.word	pause.part.0
-	.word	unpauseSound
-	.word	initLevel2
-	.word	goToGame
+	.word	goToStart
 	.size	main, .-main
 	.text
 	.align	2
@@ -930,18 +910,18 @@ lose:
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	@ link register save eliminated.
-	ldr	r3, .L127
+	ldr	r3, .L126
 	ldrh	r3, [r3]
 	tst	r3, #8
 	bxeq	lr
-	ldr	r3, .L127+4
+	ldr	r3, .L126+4
 	ldrh	r3, [r3]
 	tst	r3, #8
 	bxne	lr
 	b	goToStart
-.L128:
-	.align	2
 .L127:
+	.align	2
+.L126:
 	.word	oldButtons
 	.word	buttons
 	.size	lose, .-lose
@@ -951,6 +931,7 @@ lose:
 	.comm	buttons,2,2
 	.comm	soundB,32,4
 	.comm	soundA,32,4
+	.comm	isCheat,4,4
 	.comm	matesKissed,4,4
 	.comm	levelChangeTimer,4,4
 	.comm	level3,4,4

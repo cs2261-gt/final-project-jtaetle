@@ -7,6 +7,7 @@ void initLevel3();
 void initCasanova();
 void updateCasanova();
 void drawCasanova();
+void drawCasanovaCheat();
 void initMates();
 void addMates();
 void updateMates();
@@ -106,3 +107,6 @@ int levelChangeTimer;
 
 //Keep track of mates kissed
 int matesKissed;
+
+//cheat variable
+int isCheat;
