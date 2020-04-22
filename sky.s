@@ -35,21 +35,21 @@ skyPal:
 	.short	32627
 	.short	32765
 	.short	0
-	.short	257
-	.short	100
-	.short	1225
-	.short	2
-	.short	1191
-	.short	2315
-	.short	261
-	.short	67
-	.short	99
-	.short	1158
-	.short	2316
-	.short	1192
-	.short	1258
-	.short	34
-	.short	0
+	.short	2406
+	.short	5838
+	.short	3561
+	.short	260
+	.short	5356
+	.short	7953
+	.short	7591
+	.short	3690
+	.short	1100
+	.short	7502
+	.short	2439
+	.short	4715
+	.short	3369
+	.short	7505
+	.short	1381
 	.short	0
 	.short	0
 	.short	0

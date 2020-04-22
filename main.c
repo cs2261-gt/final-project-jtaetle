@@ -29,6 +29,7 @@ to the lose sound.
 #include "level3.h"
 #include "spritesheet.h"
 #include "treetop.h"
+#include "newtree.h"
 #include "startSong.h"
 #include "gameSong.h"
 #include "loseSong.h"
@@ -163,16 +164,20 @@ void goToGame() {
 
     REG_BG1CNT = BG_CHARBLOCK(1) | BG_SCREENBLOCK(30) | BG_4BPP | BG_SIZE_SMALL;
 
-    DMANow(3, skyTiles, &CHARBLOCK[1], skyTilesLen / 2);
+    DMANow(3, skyTiles, &CHARBLOCK[1], skyTilesLen);
 
-    DMANow(3, skyMap, &SCREENBLOCK[30], skyMapLen / 2);
+    DMANow(3, skyMap, &SCREENBLOCK[30], skyMapLen);
 
     //initializes treetops
     REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(28) | BG_4BPP | BG_SIZE_WIDE;
 
-    DMANow(3, treetopTiles, &CHARBLOCK[0], treetopTilesLen / 2);
+    DMANow(3, newtreeTiles, &CHARBLOCK[0], newtreeTilesLen / 2);
 
-    DMANow(3, treetopMap, &SCREENBLOCK[28], treetopMapLen / 2);
+    DMANow(3, newtreeMap, &SCREENBLOCK[28], newtreeMapLen / 2);
+
+    //DMANow(3, treetopTiles, &CHARBLOCK[0], treetopTilesLen / 2);
+
+    //DMANow(3, treetopMap, &SCREENBLOCK[28], treetopMapLen / 2);
 
     //initializes sprites
     DMANow(3, spritesheetPal, SPRITEPALETTE, 256);

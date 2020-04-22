@@ -122,50 +122,50 @@ goToGame:
 	mov	lr, pc
 	bx	r4
 	ldr	r2, .L12+8
-	mov	r3, #2592
+	mov	r0, #3
 	strh	r2, [r5, #10]	@ movhi
-	mov	r0, #3
-	ldr	r2, .L12+12
-	ldr	r1, .L12+16
-	mov	lr, pc
-	bx	r4
-	mov	r3, #1024
-	mov	r0, #3
-	ldr	r2, .L12+20
-	ldr	r1, .L12+24
-	mov	lr, pc
-	bx	r4
-	mov	r2, #23552
-	mov	r3, #3152
-	strh	r2, [r5, #8]	@ movhi
-	mov	r0, #3
-	mov	r2, #100663296
-	ldr	r1, .L12+28
+	ldr	r3, .L12+12
+	ldr	r2, .L12+16
+	ldr	r1, .L12+20
 	mov	lr, pc
 	bx	r4
 	mov	r3, #2048
 	mov	r0, #3
-	ldr	r2, .L12+32
-	ldr	r1, .L12+36
+	ldr	r2, .L12+24
+	ldr	r1, .L12+28
+	mov	lr, pc
+	bx	r4
+	mov	r2, #23552
+	mov	r3, #3632
+	strh	r2, [r5, #8]	@ movhi
+	mov	r0, #3
+	mov	r2, #100663296
+	ldr	r1, .L12+32
+	mov	lr, pc
+	bx	r4
+	mov	r3, #2048
+	mov	r0, #3
+	ldr	r2, .L12+36
+	ldr	r1, .L12+40
 	mov	lr, pc
 	bx	r4
 	mov	r3, #256
 	mov	r0, #3
-	ldr	r2, .L12+40
-	ldr	r1, .L12+44
+	ldr	r2, .L12+44
+	ldr	r1, .L12+48
 	mov	lr, pc
 	bx	r4
-	ldr	r2, .L12+48
+	ldr	r2, .L12+52
 	mov	r3, #16384
 	mov	r0, #3
-	ldr	r1, .L12+52
+	ldr	r1, .L12+56
 	mov	lr, pc
 	bx	r4
-	ldr	r3, .L12+56
+	ldr	r3, .L12+60
 	mov	lr, pc
 	bx	r3
 	mov	r2, #1
-	ldr	r3, .L12+60
+	ldr	r3, .L12+64
 	pop	{r4, r5, r6, lr}
 	str	r2, [r3]
 	bx	lr
@@ -175,13 +175,14 @@ goToGame:
 	.word	DMANow
 	.word	skyPal
 	.word	7684
+	.word	5216
 	.word	100679680
 	.word	skyTiles
 	.word	100724736
 	.word	skyMap
-	.word	treetopTiles
+	.word	newtreeTiles
 	.word	100720640
-	.word	treetopMap
+	.word	newtreeMap
 	.word	83886592
 	.word	spritesheetPal
 	.word	100728832

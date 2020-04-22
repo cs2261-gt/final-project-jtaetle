@@ -133,7 +133,7 @@ extern const unsigned short instructionsPal[16];
 # 24 "main.c" 2
 # 1 "sky.h" 1
 # 22 "sky.h"
-extern const unsigned short skyTiles[2592];
+extern const unsigned short skyTiles[2608];
 
 
 extern const unsigned short skyMap[1024];
@@ -298,27 +298,37 @@ extern const unsigned short treetopMap[2048];
 
 extern const unsigned short treetopPal[16];
 # 32 "main.c" 2
+# 1 "newtree.h" 1
+# 22 "newtree.h"
+extern const unsigned short newtreeTiles[3632];
+
+
+extern const unsigned short newtreeMap[2048];
+
+
+extern const unsigned short newtreePal[256];
+# 33 "main.c" 2
 # 1 "startSong.h" 1
 
 
 
 
 extern const signed char startSong[336081];
-# 33 "main.c" 2
+# 34 "main.c" 2
 # 1 "gameSong.h" 1
 
 
 
 
 extern const signed char gameSong[170114];
-# 34 "main.c" 2
+# 35 "main.c" 2
 # 1 "loseSong.h" 1
 
 
 
 
 extern const signed char loseSong[215998];
-# 35 "main.c" 2
+# 36 "main.c" 2
 # 1 "sound.h" 1
 SOUND soundA;
 SOUND soundB;
@@ -335,7 +345,7 @@ void interruptHandler();
 void pauseSound();
 void unpauseSound();
 void stopSound();
-# 36 "main.c" 2
+# 37 "main.c" 2
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 1 3
 # 10 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 3
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/machine/ieeefp.h" 1 3
@@ -1144,7 +1154,7 @@ extern long double _strtold_r (struct _reent *, const char *restrict, char **res
 extern long double strtold (const char *restrict, char **restrict);
 # 336 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 3
 
-# 37 "main.c" 2
+# 38 "main.c" 2
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdio.h" 1 3
 # 36 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdio.h" 3
 # 1 "/opt/devkitpro/devkitARM/lib/gcc/arm-none-eabi/9.1.0/include/stddef.h" 1 3 4
@@ -1555,11 +1565,11 @@ _putchar_unlocked(int _c)
 }
 # 797 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdio.h" 3
 
-# 38 "main.c" 2
+# 39 "main.c" 2
 
 
 
-# 40 "main.c"
+# 41 "main.c"
 void initialize();
 
 
@@ -1686,16 +1696,20 @@ void goToGame() {
 
     (*(volatile unsigned short*)0x400000A) = ((1)<<2) | ((30)<<8) | (0<<7) | (0<<14);
 
-    DMANow(3, skyTiles, &((charblock *)0x6000000)[1], 5184 / 2);
+    DMANow(3, skyTiles, &((charblock *)0x6000000)[1], 5216);
 
-    DMANow(3, skyMap, &((screenblock *)0x6000000)[30], 2048 / 2);
+    DMANow(3, skyMap, &((screenblock *)0x6000000)[30], 2048);
 
 
     (*(volatile unsigned short*)0x4000008) = ((0)<<2) | ((28)<<8) | (0<<7) | (1<<14);
 
-    DMANow(3, treetopTiles, &((charblock *)0x6000000)[0], 6304 / 2);
+    DMANow(3, newtreeTiles, &((charblock *)0x6000000)[0], 7264 / 2);
 
-    DMANow(3, treetopMap, &((screenblock *)0x6000000)[28], 4096 / 2);
+    DMANow(3, newtreeMap, &((screenblock *)0x6000000)[28], 4096 / 2);
+
+
+
+
 
 
     DMANow(3, spritesheetPal, ((unsigned short *)0x5000200), 256);

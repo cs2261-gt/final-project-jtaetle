@@ -257,7 +257,7 @@ void addMates() {
                 } else {
                     birds[i].row = birds[0].row;
                 }
-                while((birds[i].row > 120) || birds[i].row < 0) {
+                while((birds[i].row > 120) || (birds[i].row < 0)) {
                     birds[i].row = rand() % 200;
                 }
                 birds[i].isActive = 1;
