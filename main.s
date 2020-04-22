@@ -502,20 +502,20 @@ goToInstructions:
 	ldr	r1, .L53+4
 	mov	lr, pc
 	bx	r4
-	mov	r3, #6464
 	mov	r2, #100663296
 	mov	r0, #3
-	ldr	r1, .L53+8
+	ldr	r3, .L53+8
+	ldr	r1, .L53+12
 	mov	lr, pc
 	bx	r4
 	mov	r3, #4096
-	ldr	r2, .L53+12
+	ldr	r2, .L53+16
 	mov	r0, #3
-	ldr	r1, .L53+16
+	ldr	r1, .L53+20
 	mov	lr, pc
 	bx	r4
 	mov	r2, #3
-	ldr	r3, .L53+20
+	ldr	r3, .L53+24
 	pop	{r4, lr}
 	str	r2, [r3]
 	bx	lr
@@ -524,6 +524,7 @@ goToInstructions:
 .L53:
 	.word	DMANow
 	.word	instructionsPal
+	.word	6480
 	.word	instructionsTiles
 	.word	100720640
 	.word	instructionsMap
