@@ -155,3 +155,25 @@ void stopSound() {
     }
 
 }
+
+void pauseSoundA() {
+    if (soundA.isPlaying) {
+        soundA.isPlaying = 0;
+        REG_TM0CNT = TIMER_OFF;
+    }
+}
+
+void unpauseSoundA() {
+    if (!soundA.isPlaying) {
+        soundA.isPlaying = 1;
+        REG_TM0CNT = TIMER_ON;
+    }
+}
+
+void stopSoundB() {
+    if (soundB.isPlaying) {
+        dma[2].cnt = 0;
+        REG_TM1CNT = TIMER_OFF;
+        soundB.isPlaying = 0;
+    }
+}

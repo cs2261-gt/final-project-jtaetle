@@ -1,38 +1,26 @@
-/*
-Milestone04:
-
-Done: complete gameplay and sprites (minus the orb for the cheat), all states, a level 2
-and a level 3 with splash screen transitions. In Level 2, there are more lizards and they
-are faster. In Level 3, the lizards have fireballs. 3 animated sprite types (lizard, mates,
-and Casanova). Hearts in the bottom left to symbolize lives. Start sound, game sound, and lose
-sound loop. I also have a non-looping sound for when you lose a life (except for the last life,
-which the game goes to the lose sound). Also, the cheat is done! Instructions tell you how to activate
-/ deactivate it.
-
-TODO: I want to clean up the backgrounds and add more music.
-
-To play the game: Follow the instructions! There are also instructions for what to do on each
-screen if applicable.
-
-Bugs: Theres a weird clicking sound when my song repeats / after my lost life sound.
-I also don't know if I love the fact that the last lost life sound does not play; instead it just goes straight
-to the lose sound.
-*/
 #include "myLib.h"
 #include "start.h"
+#include "skystart.h"
 #include "instructions.h"
+#include "instructionsnew.h"
+#include "skyinstructions.h"
 #include "sky.h"
 #include "game.h"
 #include "pause.h"
+#include "skypause.h"
 #include "lose.h"
+#include "skylose.h"
 #include "level2.h"
+#include "skylevel2.h"
 #include "level3.h"
+#include "skylevel3.h"
 #include "spritesheet.h"
-#include "treetop.h"
 #include "newtree.h"
+#include "tree.h"
 #include "startSong.h"
 #include "gameSong.h"
 #include "loseSong.h"
+#include "pauseSong.h"
 #include "sound.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -69,7 +57,11 @@ SOUND soundB;
 
 //States
 enum {START, GAME, PAUSE, INSTRUCTIONS, LOSE, LEVEL2, LEVEL3};
-int state = 0;
+int state;
+
+//screenblock variables
+int screenBlockBG0;
+int screenBlockBG1;
 
 int main() {
 
@@ -79,6 +71,11 @@ int main() {
 
         oldButtons = buttons;
         buttons = BUTTONS;
+
+        REG_BG0HOFF = hOff0 / 2;
+        REG_BG1HOFF = hOff1 / 4;
+        REG_BG0VOFF = vOff0;
+        REG_BG1VOFF = vOff1;
 
         switch (state) {
         case START:
@@ -105,6 +102,8 @@ int main() {
         default:
             break;
         }
+
+        waitForVBlank();
 	}
 
     return 0;
@@ -113,38 +112,60 @@ int main() {
 //initialize game
 void initialize() {
 
-    REG_DISPCTL = MODE0 | BG0_ENABLE | SPRITE_ENABLE;
+    REG_DISPCTL = MODE0 | BG0_ENABLE | BG1_ENABLE | SPRITE_ENABLE;
 
-    REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(28) | BG_4BPP | BG_SIZE_LARGE;
+    REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(28) | BG_4BPP | BG_SIZE_SMALL;
+
+    REG_BG1CNT = BG_CHARBLOCK(1) | BG_SCREENBLOCK(30) | BG_4BPP | BG_SIZE_SMALL;
 
     setupSounds();
-	setupInterrupts(); 
-
-    goToStart();
+	setupInterrupts();
 
     seed = 0;
+    hOff0 = 0; 
+    hOff1 = 0;
+    vOff0 = 0;
+    vOff1 = 0;
+    screenBlockBG0 = 26;
+    screenBlockBG1 = 4;
+
+    goToStart();
 }
 
 //Sets up the Start State
 void goToStart() {
-    DMANow(3, startPal, PALETTE, 16);
-    DMANow(3, startTiles, &CHARBLOCK[0], startTilesLen / 2);
-    DMANow(3, startMap, &SCREENBLOCK[28], 1024 * 4);
 
-    playSoundA(startSong, STARTSONGLEN, 1);
+    //initialize sky
+    DMANow(3, skystartPal, PALETTE, skystartPalLen);
+
+    DMANow(3, skystartTiles, &CHARBLOCK[1], skystartTilesLen);
+
+    DMANow(3, skystartMap, &SCREENBLOCK[30], skystartMapLen);
+
+    //initializes start
+    DMANow(3, startTiles, &CHARBLOCK[0], startTilesLen);
+
+    DMANow(3, startMap, &SCREENBLOCK[28], startMapLen);
+
+    //playSoundA(startSong, STARTSONGLEN, 1);
     
     state = START;
+
+    hideSprites();
+    DMANow(3, shadowOAM, OAM, 512);
+
 }
 
 //start state
 void start() {
 
     seed++;
+    hOff1++;
 
     if(BUTTON_PRESSED(BUTTON_START)) {
         srand(seed);
         stopSound();
-        playSoundA(gameSong, GAMESONGLEN, 1);
+        //playSoundA(gameSong, GAMESONGLEN - 75, 1);
         initGame();
         goToGame();
     }
@@ -171,17 +192,16 @@ void goToGame() {
     //initializes treetops
     REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(28) | BG_4BPP | BG_SIZE_WIDE;
 
-    DMANow(3, newtreeTiles, &CHARBLOCK[0], newtreeTilesLen / 2);
+    DMANow(3, treeTiles, &CHARBLOCK[0], treeTilesLen / 2);
 
-    DMANow(3, newtreeMap, &SCREENBLOCK[28], newtreeMapLen / 2);
-
-    //DMANow(3, treetopTiles, &CHARBLOCK[0], treetopTilesLen / 2);
-
-    //DMANow(3, treetopMap, &SCREENBLOCK[28], treetopMapLen / 2);
+    DMANow(3, treeMap, &SCREENBLOCK[28], treeMapLen / 2);
 
     //initializes sprites
     DMANow(3, spritesheetPal, SPRITEPALETTE, 256);
+
     DMANow(3, spritesheetTiles, &CHARBLOCK[4], spritesheetTilesLen / 2);
+
+    REG_BLDCNT = BLD_OBJa | BLD_BLACK;
 
     hideSprites();
     state = GAME;
@@ -195,14 +215,20 @@ void game() {
     drawGame();
 
     if(BUTTON_PRESSED(BUTTON_START)) {
-        pauseSound();
+        //pauseSound();
+        stopSoundB();
+        pauseSoundA();
+        //playSoundB(pauseSong, PAUSESONGLEN - 100, 1);
         goToPause();
     }
+   
+    //lose condition
     if(matesGone == 5) {
         stopSound();
-        playSoundA(loseSong, LOSESONGLEN, 1);
+        //playSoundA(loseSong, LOSESONGLEN - 500, 1);
         goToLose();
     }
+
     if(initLevel2Change) {
         goToLevel2();
     }
@@ -215,15 +241,16 @@ void game() {
 //Sets up Level 2
 void goToLevel2() {
 
-    REG_BG0HOFF = 0;
+    hOff0 = 0;
 
-    REG_DISPCTL = MODE0 | BG0_ENABLE | SPRITE_ENABLE;
+    //initialize sky
+    DMANow(3, skylevel2Pal, PALETTE, 256);
+    DMANow(3, skylevel2Tiles, &CHARBLOCK[1], skylevel2TilesLen);
+    DMANow(3, skylevel2Map, &SCREENBLOCK[30], skylevel2MapLen);
     
-    REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(28) | BG_4BPP | BG_SIZE_LARGE;
-
-    DMANow(3, level2Pal, PALETTE, 16);
-    DMANow(3, level2Tiles, &CHARBLOCK[0], level2TilesLen / 2);
-    DMANow(3, level2Map, &SCREENBLOCK[28], 1024 * 4);
+    //initialize level 2
+    DMANow(3, level2Tiles, &CHARBLOCK[0], level2TilesLen);
+    DMANow(3, level2Map, &SCREENBLOCK[28], level2MapLen);
 
     hideSprites();
     DMANow(3, shadowOAM, OAM, 512);
@@ -231,12 +258,15 @@ void goToLevel2() {
     state = LEVEL2;
 
 }
+
 //level 2 state
 void level2State() {
 
+    hOff1++;
     levelChangeTimer++;
 
-    if(levelChangeTimer == 100000) {
+    //timer for level transition
+    if(levelChangeTimer == 300) {
         initLevel2();
         goToGame();
     }
@@ -246,15 +276,16 @@ void level2State() {
 //Sets up Level 3
 void goToLevel3() {
 
-    REG_BG0HOFF = 0;
+    hOff0 = 0;
 
-    REG_DISPCTL = MODE0 | BG0_ENABLE | SPRITE_ENABLE;
-    
-    REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(28) | BG_4BPP | BG_SIZE_LARGE;
+    //initialize sky
+    DMANow(3, skylevel3Pal, PALETTE, 256);
+    DMANow(3, skylevel3Tiles, &CHARBLOCK[1], skylevel3TilesLen);
+    DMANow(3, skylevel3Map, &SCREENBLOCK[30], skylevel3MapLen);
 
-    DMANow(3, level3Pal, PALETTE, 16);
-    DMANow(3, level3Tiles, &CHARBLOCK[0], level3TilesLen / 2);
-    DMANow(3, level3Map, &SCREENBLOCK[28], 1024 * 4);
+    //initialize level 3
+    DMANow(3, level3Tiles, &CHARBLOCK[0], level3TilesLen);
+    DMANow(3, level3Map, &SCREENBLOCK[28], level3MapLen);
 
     hideSprites();
     DMANow(3, shadowOAM, OAM, 512);
@@ -265,9 +296,11 @@ void goToLevel3() {
 //level 3 state
 void level3State() {
 
+    hOff1++;
     levelChangeTimer++;
 
-    if(levelChangeTimer == 100000) {
+    //timer for level transition
+    if(levelChangeTimer == 300) {
         initLevel3();
         goToGame();
     }
@@ -277,15 +310,16 @@ void level3State() {
 //Sets up the Pause State
 void goToPause() {
 
-    REG_BG0HOFF = 0;
+    hOff0 = 0;
 
-    REG_DISPCTL = MODE0 | BG0_ENABLE | SPRITE_ENABLE;
-    
-    REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(28) | BG_4BPP | BG_SIZE_LARGE;
+    //initialize sky
+    DMANow(3, skypausePal, PALETTE, skypausePalLen);
+    DMANow(3, skypauseTiles, &CHARBLOCK[1], skypauseTilesLen);
+    DMANow(3, skypauseMap, &SCREENBLOCK[30], skypauseMapLen);
 
-    DMANow(3, pausePal, PALETTE, 16);
-    DMANow(3, pauseTiles, &CHARBLOCK[0], pauseTilesLen / 2);
-    DMANow(3, pauseMap, &SCREENBLOCK[28], 1024 * 4);
+    //initialize lose state
+    DMANow(3, pauseTiles, &CHARBLOCK[0], pauseTilesLen);
+    DMANow(3, pauseMap, &SCREENBLOCK[28], pauseMapLen);
 
     hideSprites();
     DMANow(3, shadowOAM, OAM, 512);
@@ -294,52 +328,118 @@ void goToPause() {
 
 //pause state
 void pause() {
+
+    hOff1++;
+
     if(BUTTON_PRESSED(BUTTON_START)) {
-        unpauseSound();
+        stopSoundB();
+        unpauseSoundA();
         goToGame();
+    }
+    if(BUTTON_PRESSED(BUTTON_SELECT)) {
+        stopSound();
+        //playSoundA(loseSong, LOSESONGLEN - 500, 1);
+        goToLose();
     }
 }
 
 //Set Up Instructions State
 void goToInstructions() {
-    DMANow(3, instructionsPal, PALETTE, 16);
-    DMANow(3, instructionsTiles, &CHARBLOCK[0], instructionsTilesLen / 2);
-    DMANow(3, instructionsMap, &SCREENBLOCK[28], 1024 * 4);
-    
+    //REG_BG0HOFF = 0;
+    //DMANow(3, instructionsPal, PALETTE, 16);
+    //DMANow(3, instructionsTiles, &CHARBLOCK[0], instructionsTilesLen / 2);
+    //DMANow(3, instructionsMap, &SCREENBLOCK[28], 1024 * 4);
+    hOff0 = 0;
+
+    REG_DISPCTL = MODE0 | BG0_ENABLE | SPRITE_ENABLE;
+
+    //initialize instructions
+    REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(28) | BG_SIZE_TALL | BG_4BPP;
+
+    //initialize sky
+    //REG_BG1CNT = BG_CHARBLOCK(1) | BG_SCREENBLOCK(4) | BG_4BPP | BG_SIZE_TALL;
+
+    DMANow(3, instructionsnewPal, PALETTE, instructionsnewPalLen);
+    //DMANow(3, skyinstructionsTiles, &CHARBLOCK[1], skyinstructionsTilesLen);
+    //DMANow(3, skyinstructionsMap, &SCREENBLOCK[4], skyinstructionsMapLen);
+    DMANow(3, instructionsnewTiles, &CHARBLOCK[0], instructionsnewTilesLen);
+    DMANow(3, instructionsnewMap, &SCREENBLOCK[28], instructionsnewMapLen);
+
     state = INSTRUCTIONS;
 }
 
 //instructions state
 void instructions() {
+
     if(BUTTON_PRESSED(BUTTON_START)) {
         stopSound();
-        playSoundA(gameSong, GAMESONGLEN, 1);
+        //playSoundA(gameSong, GAMESONGLEN - 75, 1);
+        vOff0 = 0;
         initGame();
         goToGame();
     }
+
+    //scroll down
+    if(BUTTON_HELD(BUTTON_DOWN)) {
+        if(vOff0 < 512-160-1) {
+            vOff0++;
+        }
+        //vOff0++;
+        /*if((vOff1 < 350)) {
+            vOff1++;
+        }*/
+    }
+
+    //scroll up
+    if(BUTTON_HELD(BUTTON_UP)) {
+        if (vOff0 > 0) {
+            vOff0--;
+        }
+    }
+
+    //XL Background vOff check for instructions
+   /*if (vOff0 >= 256 && screenBlockBG0 < 27) {
+        vOff0 = 0;
+        screenBlockBG0++;
+        REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(screenBlockBG0) | BG_SIZE_TALL | BG_4BPP;
+    }*/
+
+    //XL Background vOff check for sky
+    /*if ((vOff1 >= 256) && (screenBlockBG1 < 6)) {
+        screenBlockBG1++;
+        vOff1 -= 256;
+        REG_BG1CNT = BG_CHARBLOCK(1) | BG_SCREENBLOCK(screenBlockBG1) | BG_4BPP | BG_SIZE_TALL;
+    }*/
+
 }
 
 //Set up Lose State
 void goToLose() {
 
-    REG_BG0HOFF = 0;
+    hOff0 = 0;
 
-    REG_DISPCTL = MODE0 | BG0_ENABLE | SPRITE_ENABLE;
-    
-    REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(28) | BG_4BPP | BG_SIZE_LARGE;
+    //initialize sky
+    DMANow(3, skylosePal, PALETTE, skylosePalLen);
+    DMANow(3, skyloseTiles, &CHARBLOCK[1], skyloseTilesLen);
+    DMANow(3, skyloseMap, &SCREENBLOCK[30], skyloseMapLen);
 
-    DMANow(3, losePal, PALETTE, 16);
-    DMANow(3, loseTiles, &CHARBLOCK[0], loseTilesLen / 2);
-    DMANow(3, loseMap, &SCREENBLOCK[28], 1024 * 4);
+    //initialize lose state
+    DMANow(3, loseTiles, &CHARBLOCK[0], loseTilesLen);
+    DMANow(3, loseMap, &SCREENBLOCK[28], loseMapLen);
     
     hideSprites();
+    drawScore(135, 104);
     DMANow(3, shadowOAM, OAM, 512);
     state = LOSE;
 }
 
 //lose state
 void lose() {
+
+    hOff1++;
+    
     if(BUTTON_PRESSED(BUTTON_START)) {
         goToStart();
     }
+
 }

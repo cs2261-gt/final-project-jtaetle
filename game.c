@@ -23,15 +23,16 @@ FIREBALL fireball[FIREBALLCOUNT];
 //Heart Pooling
 HEART heart[HEARTCOUNT];
 
+//Lost Life Pooling
+LOSTLIFE lostLife[LOSTLIFECOUNT];
+
 //Bird Animation State
 enum {CBIRD1, CBIRD2, CBIRD3, FBIRD1, FBIRD2, FBIRD3};
 
 //Lizard Animation State
-enum {L1, L2, L3};
+enum {LIZARD1, LIZARD2, LIZARD3};
 
 void initGame() {
-
-    hOff = 0;
 
     initCasanova();
 
@@ -43,22 +44,26 @@ void initGame() {
 
     initHeart();
 
+    initScore();
+
+    initLostLife();
+
     //initialize timer
     timer = 95;
 
     //initialize lizard timer
     lTimer = 0;
 
-    //initialize fireball timer
-    fTimer = 0;
-
     //initialize level timer
     levelChangeTimer = 0;
+
+    //initialize alpha blend timer
+    alphaBlendTimer = 0;
 
     //initialize level 2 change
     initLevel2Change = 0;
 
-    //initialize level 3 changes
+    //initialize level 3 change
     initLevel3Change = 0;
 
     //initialize matesGone
@@ -70,9 +75,19 @@ void initGame() {
     //initialize levels
     level2 = 0;
     level3 = 0;
+    
+
+    //initialize level display
+    level = 1;
 
     //initialize cheat
     isCheat = 0;
+
+    blackWeight = 16;
+
+    alphaUp = 0;
+    alphaDown = 0;
+
 }
 
 void updateGame() {
@@ -92,7 +107,8 @@ void updateGame() {
         }
     }
     //update background parallax
-    hOff++;
+    hOff0++;
+    hOff1++;
 
     //update timer
     timer++;
@@ -110,20 +126,31 @@ void updateGame() {
     updateMates();
 
     if (!(isCheat)) {
+
         updateLizard();
 
         updateFireball();
+
     }
 
     updateHeart();
+
+    updateScore();
+
+    alphaBlending();
+
 }
 
 void drawGame() {
     
     if(!(isCheat)) {
+
         drawCasanova();
+
     } else {
+
         drawCasanovaCheat();
+
     }
 
     drawMates();
@@ -134,17 +161,22 @@ void drawGame() {
 
     drawHeart();
 
-    waitForVBlank();
+    drawScore(0, 2);
+    
+    drawLevel();
 
-    REG_BG1HOFF = hOff / 4;
-    REG_BG0HOFF = hOff / 2;
+    drawLostLife();
 
+    REG_BLDY = BLD_EY((blackWeight));
     DMANow(3, shadowOAM, OAM, 512);
 }
 
 //initialize level2
 void initLevel2() {
-    hOff = 0;
+    //increase level display 
+    level++;
+    //reset bg0 hOff
+    hOff0 = 0;
     initLevel2Change = 0;
     levelChangeTimer = 0;
 
@@ -156,10 +188,16 @@ void initLevel2() {
 
     initFireball();
 
+    initLostLife();
+
 }
 
 void initLevel3() {
-    hOff = 0;
+    //update level
+    level++;
+
+    //reset bg0 hOff
+    hOff0 = 0;
     initLevel3Change = 0;
     levelChangeTimer = 0;
 
@@ -171,6 +209,50 @@ void initLevel3() {
 
     initFireball();
 
+    initLostLife();
+
+}
+
+//adjust alpha blending
+void alphaBlending() {
+    if (matesGone < 4) {
+        if (blackWeight > 0) {
+            blackWeight--;
+        }
+    } else {
+        if (alphaBlendTimer == 1) {
+            if (blackWeight == 0) {
+                alphaUp = 1;
+                alphaDown = 0;
+            } else if (blackWeight == 16) {
+                alphaDown = 1;
+                alphaUp = 0;
+            }
+            if (alphaUp) {
+                blackWeight++;
+            } else if (alphaDown) {
+                blackWeight--;
+            }
+            alphaBlendTimer = 0;
+        }
+        alphaBlendTimer++;
+    }
+}
+
+//draw level
+void drawLevel() {
+    //draw LEVEL: 
+    shadowOAM[10].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | 0 | ATTR0_NOBLEND;
+    shadowOAM[10].attr1 = ATTR1_SMALL | 200;
+    shadowOAM[10].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(4, 10);
+    shadowOAM[11].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | 0 | ATTR0_NOBLEND;
+    shadowOAM[11].attr1 = ATTR1_SMALL | 216;
+    shadowOAM[11].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(6, 10);
+
+    //draw the actual level
+    shadowOAM[12].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | 0 | ATTR0_NOBLEND;
+    shadowOAM[12].attr1 = ATTR1_SMALL | 228;
+    shadowOAM[12].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * level, 8);
 }
 
 //initializes casanova
@@ -217,23 +299,23 @@ void updateCasanova() {
 
 //draw Casanova
 void drawCasanova(){
-    shadowOAM[0].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | birds[0].row;
-    shadowOAM[0].attr1 = ATTR1_MEDIUM | birds[0].col;
-    shadowOAM[0].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(birds[0].aniState * 4, 0 * 4);
+    shadowOAM[13].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | birds[0].row;
+    shadowOAM[13].attr1 = ATTR1_MEDIUM | birds[0].col;
+    shadowOAM[13].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(birds[0].aniState * 4, 0);
 }
 
 //draw Casanova Cheat Mode
 void drawCasanovaCheat() {
-    shadowOAM[0].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | birds[0].row;
-    shadowOAM[0].attr1 = ATTR1_MEDIUM | birds[0].col;
-    shadowOAM[0].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(birds[0].aniState * 4, 8);
+    shadowOAM[13].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | birds[0].row;
+    shadowOAM[13].attr1 = ATTR1_MEDIUM | birds[0].col;
+    shadowOAM[13].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(birds[0].aniState * 4, 4);
 }
 
 //initializes mates
 void initMates() {
     for (int i = 1; i < BIRDCOUNT; i++) {
-        birds[i].width = 22;
-        birds[i].height = 28;
+        birds[i].width = 24;
+        birds[i].height = 32;
         birds[i].col = 240;
         birds[i].row = rand() % 200;
         while((birds[i].row > 120) || birds[i].row < 0) {
@@ -242,6 +324,7 @@ void initMates() {
         birds[i].isActive = 0;
         birds[i].aniState = FBIRD1;
         birds[i].aniCounter = 0;
+        birds[i].missedTimer = 0;
     }
 }
 
@@ -263,6 +346,7 @@ void addMates() {
                 birds[i].isActive = 1;
                 birds[i].aniState = FBIRD1;
                 birds[i].aniCounter = 0;
+                birds[i].missedTimer = 0;
                 break;
             }
         }
@@ -274,7 +358,7 @@ void addMates() {
 void updateMates() {
      for (int i = 1; i < BIRDCOUNT; i++) {
         if (birds[i].isActive) {
-            birds[i].col--;
+            birds[i].col --;
             if (isCheat) {
                 birds[i].row = birds[0].row;
             }
@@ -287,9 +371,11 @@ void updateMates() {
                 birds[i].aniCounter = 0;
             }
             if (birds[i].col == 0) {
+                //birds[i].missedTimer++;
+                addLostLife(birds[i].col, birds[i].row);
+                playSoundB(missedMate, MISSEDMATELEN - 125, 0);
                 birds[i].isActive = 0;
                 matesGone++;
-                //playSoundB(missedMate, MISSEDMATELEN, 0);
             }
             if((collision(birds[0].col, birds[0].row, birds[0].width,
             birds[0].height, birds[i].col, birds[i].row, birds[i].width, birds[i].height))) {
@@ -313,11 +399,11 @@ void updateMates() {
 void drawMates() {
     for(int i = 1; i < BIRDCOUNT; i++) {
         if (birds[i].isActive) {
-            shadowOAM[i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | birds[i].row;
-            shadowOAM[i].attr1 = ATTR1_MEDIUM | birds[i].col;
-            shadowOAM[i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(birds[i].aniState * 4, 0 * 4);
+            shadowOAM[13+i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | birds[i].row;
+            shadowOAM[13+i].attr1 = ATTR1_MEDIUM | birds[i].col;
+            shadowOAM[13+i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(birds[i].aniState * 4, 0);
         } else {
-            shadowOAM[i].attr0 = ATTR0_HIDE;
+            shadowOAM[13+i].attr0 = ATTR0_HIDE;
         }
     }
 }
@@ -333,7 +419,7 @@ void initLizard() {
             lizard[i].row = rand() % 200;
         }
         lizard[i].isActive = 0;
-        lizard[i].aniState = L1;
+        lizard[i].aniState = LIZARD1;
         lizard[i].aniCounter = 0;
     }
 }
@@ -350,18 +436,11 @@ void addLizard() {
                         lizard[i].row = rand() % 200;
                     }
                     lizard[i].isActive = 1;
-                    lizard[i].aniState = L1;
+                    lizard[i].aniState = LIZARD1;
                     lizard[i].aniCounter = 0;
                     //add fireball
                     if (level3) {
-                        for (int j = 0; j < FIREBALLCOUNT; j++) {
-                            if(!fireball[j].isActive) {
-                                fireball[j].col = lizard[i].col;
-                                fireball[j].row = lizard[i].row + 8;
-                                fireball[j].isActive = 1;
-                                break;
-                            }
-                        }
+                        addFireball(i);
                     }
                     break;
                 }
@@ -378,7 +457,7 @@ void addLizard() {
                         lizard[i].row = rand() % 200;
                     }
                     lizard[i].isActive = 1;
-                    lizard[i].aniState = L1;
+                    lizard[i].aniState = LIZARD1;
                     lizard[i].aniCounter = 0;
                     break;
                 }
@@ -402,22 +481,23 @@ void updateLizard() {
                 if (lizard[i].col == 0) {
                     lizard[i].isActive = 0;
                 } else {
-                    lizard[i].col--;
+                    lizard[i].col -= 1.0001;
                 }
             }
             if (lizard[i].aniCounter == 8) {
-                if (lizard[i].aniState != L3) {
+                if (lizard[i].aniState != LIZARD3) {
                     lizard[i].aniState++;
                 } else {
-                    lizard[i].aniState = L1;
+                    lizard[i].aniState = LIZARD1;
                 }
                 lizard[i].aniCounter = 0;
             }
             if((collision(birds[0].col, birds[0].row, birds[0].width,
             birds[0].height, lizard[i].col, lizard[i].row, lizard[i].width, lizard[i].height))) {
+                addLostLife(lizard[i].col, lizard[i].row);
+                playSoundB(missedMate, MISSEDMATELEN - 125, 0);
                 lizard[i].isActive = 0;
                 matesGone++;
-                //playSoundB(missedMate, MISSEDMATELEN, 0);
             }
             lizard[i].aniCounter++;
         }
@@ -428,11 +508,11 @@ void updateLizard() {
 void drawLizard() {
     for (int i = 0; i < LIZARDCOUNT; i++) {
         if ((lizard[i].isActive) && !(isCheat)) {
-            shadowOAM[4+i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | lizard[i].row;
-            shadowOAM[4+i].attr1 = ATTR1_MEDIUM | lizard[i].col;
-            shadowOAM[4+i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(lizard[i].aniState * 4, 4);
+            shadowOAM[17+i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | lizard[i].row;
+            shadowOAM[17+i].attr1 = ATTR1_MEDIUM | lizard[i].col;
+            shadowOAM[17+i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID((lizard[i].aniState + 3) * 4 , 4);
         } else {
-            shadowOAM[4+i].attr0 = ATTR0_HIDE;
+            shadowOAM[17+i].attr0 = ATTR0_HIDE;
         }
     }
 }
@@ -451,22 +531,33 @@ void initFireball() {
     }
 }
 
+//add fireball
+void addFireball(int i) {
+    for (int j = 0; j < FIREBALLCOUNT; j++) {
+        if(!fireball[j].isActive) {
+            fireball[j].col = lizard[i].col;
+            fireball[j].row = lizard[i].row + 8;
+            fireball[j].isActive = 1;
+            break;
+        }
+    }
+}
+
 //update fireball
 void updateFireball() {
-    if (level3) {
-        for(int j = 0; j < FIREBALLCOUNT; j++) {
-            if (fireball[j].isActive) {
-                if (fireball[j].col < 3) {
-                    fireball[j].isActive = 0;
-                } else {
-                    fireball[j].col = fireball[j].col - 3;
-                }
-                if((collision(birds[0].col, birds[0].row, birds[0].width,
-                birds[0].height, fireball[j].col, fireball[j].row, fireball[j].width,fireball[j].height))) {
-                    fireball[j].isActive = 0;
-                    matesGone++;
-                    //playSoundB(missedMate, MISSEDMATELEN, 0);
-                }
+    for(int i = 0; i < FIREBALLCOUNT; i++) {
+        if (fireball[i].isActive) {
+            if (fireball[i].col < 3) {
+                fireball[i].isActive = 0;
+            } else {
+                fireball[i].col = fireball[i].col - 3;
+            }
+            if((collision(birds[0].col, birds[0].row, birds[0].width,
+            birds[0].height, fireball[i].col, fireball[i].row, fireball[i].width,fireball[i].height))) {
+                addLostLife(fireball[i].col, fireball[i].row);
+                playSoundB(missedMate, MISSEDMATELEN - 125, 0);
+                fireball[i].isActive = 0;
+                matesGone++;
             }
         }
     }
@@ -476,11 +567,11 @@ void updateFireball() {
 void drawFireball() {
     for (int i = 0; i < FIREBALLCOUNT; i++) {
         if ((fireball[i].isActive) &&!(isCheat)) {
-            shadowOAM[7+i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | fireball[i].row;
-            shadowOAM[7+i].attr1 = ATTR1_SMALL | fireball[i].col;
-            shadowOAM[7+i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(12, 6);
+            shadowOAM[20+i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | fireball[i].row;
+            shadowOAM[20+i].attr1 = ATTR1_SMALL | fireball[i].col;
+            shadowOAM[20+i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(20, 10);
         } else {
-            shadowOAM[7+i].attr0 = ATTR0_HIDE;
+            shadowOAM[20+i].attr0 = ATTR0_HIDE;
         }
     }
 }
@@ -495,12 +586,12 @@ void initHeart() {
         heart[i].isActive = 1;
     }
 }
-
+ 
 //update hearts
 void updateHeart() {
     for (int i = HEARTCOUNT - 1; i > ((HEARTCOUNT - 1) - matesGone); i--){ 
         if (heart[i].isActive) {
-            playSoundB(missedMate, MISSEDMATELEN, 0);
+            //playSoundB(missedMate, MISSEDMATELEN - 125, 0);
             heart[i].isActive = 0;   
         }
     }
@@ -510,14 +601,116 @@ void updateHeart() {
 void drawHeart() {
      for (int i = 0; i < HEARTCOUNT; i++) {
         if (heart[i].isActive) {
-            shadowOAM[15+i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | heart[i].row;
-            shadowOAM[15+i].attr1 = ATTR1_SMALL | heart[i].col;
-            shadowOAM[15+i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(12, 4);
+            shadowOAM[5+i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | heart[i].row;
+            shadowOAM[5+i].attr1 = ATTR1_SMALL | heart[i].col;
+            shadowOAM[5+i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(20, 8);
         } else {
-            shadowOAM[15+i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | heart[i].row;
-            shadowOAM[15+i].attr1 = ATTR1_SMALL | heart[i].col;
-            shadowOAM[15+i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(14, 4);
+            shadowOAM[5+i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | heart[i].row;
+            shadowOAM[5+i].attr1 = ATTR1_SMALL | heart[i].col;
+            shadowOAM[5+i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(22, 8);
         }
     }
+}
 
+//initialize score
+void initScore() {
+    ones = 0;
+    tens = 0;
+    hundreds = 0;
+
+}
+
+//update score
+void updateScore() {
+    ones = matesKissed % 10;
+    if (matesKissed > 9) {
+        if (matesKissed > 99){
+            hundreds = matesKissed  / 100;
+            tens = (matesKissed - (hundreds * 100) - ones) / 10;
+        } else {
+            tens = (matesKissed - ones) / 10;
+        }
+    }
+    
+}
+
+//draw score
+void drawScore(int scorePlaceRow, int scorePlaceCol) { 
+
+    //draw SCORE:
+    shadowOAM[0].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
+    shadowOAM[0].attr1 = ATTR1_SMALL | scorePlaceCol;
+    shadowOAM[0].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(0, 10);
+    shadowOAM[1].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
+    shadowOAM[1].attr1 = ATTR1_SMALL | (scorePlaceCol + 16);
+    shadowOAM[1].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2, 10);
+
+    //score
+    if (matesKissed > 9) {
+        if (matesKissed > 99) {
+            shadowOAM[4].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
+            shadowOAM[4].attr1 = ATTR1_SMALL | (scorePlaceCol + 30);
+            shadowOAM[4].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * hundreds, 8);
+            shadowOAM[3].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
+            shadowOAM[3].attr1 = ATTR1_SMALL | (scorePlaceCol + 35);
+            shadowOAM[3].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * tens, 8);
+            shadowOAM[2].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
+            shadowOAM[2].attr1 = ATTR1_SMALL | (scorePlaceCol + 40);
+            shadowOAM[2].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * ones, 8);
+        } else {
+            shadowOAM[3].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
+            shadowOAM[3].attr1 = ATTR1_SMALL | (scorePlaceCol + 30);
+            shadowOAM[3].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * tens, 8);
+            shadowOAM[2].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
+            shadowOAM[2].attr1 = ATTR1_SMALL | (scorePlaceCol + 35);
+            shadowOAM[2].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * ones, 8);
+        }    
+    } else {
+        shadowOAM[2].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow ;
+        shadowOAM[2].attr1 = ATTR1_SMALL | (scorePlaceCol + 30);
+        shadowOAM[2].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * ones, 8);
+    }
+}
+
+void initLostLife() {
+    for (int i = 0; i < LOSTLIFECOUNT; i++) {
+        lostLife[i].row = 0;
+	    lostLife[i].col = 0;
+        lostLife[i].missedTimer = 0;
+        lostLife[i].isActive = 0;
+    }
+}
+
+void addLostLife(int col, int row) {
+     for (int i = 0; i < LOSTLIFECOUNT; i++) {
+        if(!lostLife[i].isActive) {
+            if (row < 16) {
+                row = row + 5;
+            } else if (row > 144) {
+                row = row - 5;
+            }
+            lostLife[i].row = row;
+            lostLife[i].col = col + 5;
+            lostLife[i].missedTimer = 0;
+            lostLife[i].isActive = 1;
+            break;
+        }
+    }
+}
+
+void drawLostLife() {
+    for (int i = 0; i < LOSTLIFECOUNT; i++) {
+        if(lostLife[i].isActive) {
+            if(lostLife[i].missedTimer < 50) {
+                shadowOAM[29+i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | lostLife[i].row ;
+                shadowOAM[29+i].attr1 = ATTR1_SMALL | lostLife[i].col;
+                shadowOAM[29+i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(22, 8);
+                lostLife[i].missedTimer++;
+            } else {
+                lostLife[i].isActive = 0;
+            }
+        } else {
+            shadowOAM[29+i].attr0 = ATTR0_HIDE;
+        }
+    }
 }

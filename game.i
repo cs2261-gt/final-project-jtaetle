@@ -117,6 +117,8 @@ void updateGame();
 void drawGame();
 void initLevel2();
 void initLevel3();
+void updateLevel();
+void drawLevel();
 void initCasanova();
 void updateCasanova();
 void drawCasanova();
@@ -129,15 +131,29 @@ void initLizard();
 void addLizard();
 void updateLizard();
 void drawLizard();
+void addFireball();
 void initFireball();
 void updateFireball();
 void drawFireball();
 void initHeart();
 void updateHeart();
 void drawHeart();
+void initLostLife();
+void addLostLife();
+void drawLostLife();
+void initScore();
+void updateScore();
+void drawScore();
+void alphaBlending();
 
 
-unsigned short hOff;
+
+unsigned short vOff0;
+unsigned short vOff1;
+
+
+unsigned short hOff0;
+unsigned short hOff1;
 
 
 typedef struct {
@@ -147,6 +163,7 @@ typedef struct {
     int height;
     int aniState;
     int aniCounter;
+    int missedTimer;
     int isActive;
 } BIRD;
 
@@ -158,6 +175,7 @@ typedef struct {
     int height;
     int aniState;
     int aniCounter;
+    int missedTimer;
     int isActive;
 } LIZARD;
 
@@ -178,20 +196,29 @@ typedef struct {
     int height;
     int isActive;
 } HEART;
-# 83 "game.h"
+
+
+typedef struct {
+    int row;
+ int col;
+    int missedTimer;
+    int isActive;
+} LOSTLIFE;
+# 111 "game.h"
 int timer;
 
 
 int lTimer;
 
 
-int fTimer;
-
-
 int matesGone;
 
 
-int activeLizard;
+int alphaBlendTimer;
+
+
+int alphaUp;
+int alphaDown;
 
 
 int initLevel2Change;
@@ -202,13 +229,26 @@ int level2;
 int level3;
 
 
+int level;
+
+
 int levelChangeTimer;
+
+int lRow;
+int lCol;
 
 
 int matesKissed;
 
 
 int isCheat;
+# 159 "game.h"
+int blackWeight;
+
+
+int ones;
+int tens;
+int hundreds;
 # 3 "game.c" 2
 # 1 "sky.h" 1
 # 22 "sky.h"
@@ -235,7 +275,7 @@ extern const unsigned short treetopPal[16];
 extern const unsigned short spritesheetTiles[16384];
 
 
-extern const unsigned short spritesheetPal[16];
+extern const unsigned short spritesheetPal[256];
 # 6 "game.c" 2
 # 1 "sound.h" 1
 SOUND soundA;
@@ -253,13 +293,16 @@ void interruptHandler();
 void pauseSound();
 void unpauseSound();
 void stopSound();
+void pauseSoundA();
+void unpauseSoundA();
+void stopSoundB();
 # 7 "game.c" 2
 # 1 "missedMate.h" 1
 
 
 
 
-extern const signed char missedMate[2941];
+extern const signed char missedMate[5615];
 # 8 "game.c" 2
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 1 3
 # 10 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 3
@@ -1500,14 +1543,15 @@ FIREBALL fireball[9];
 HEART heart[5];
 
 
+LOSTLIFE lostLife[5];
+
+
 enum {CBIRD1, CBIRD2, CBIRD3, FBIRD1, FBIRD2, FBIRD3};
 
 
-enum {L1, L2, L3};
+enum {LIZARD1, LIZARD2, LIZARD3};
 
 void initGame() {
-
-    hOff = 0;
 
     initCasanova();
 
@@ -1519,6 +1563,10 @@ void initGame() {
 
     initHeart();
 
+    initScore();
+
+    initLostLife();
+
 
     timer = 95;
 
@@ -1526,10 +1574,10 @@ void initGame() {
     lTimer = 0;
 
 
-    fTimer = 0;
-
-
     levelChangeTimer = 0;
+
+
+    alphaBlendTimer = 0;
 
 
     initLevel2Change = 0;
@@ -1548,7 +1596,17 @@ void initGame() {
     level3 = 0;
 
 
+
+    level = 1;
+
+
     isCheat = 0;
+
+    blackWeight = 16;
+
+    alphaUp = 0;
+    alphaDown = 0;
+
 }
 
 void updateGame() {
@@ -1568,7 +1626,8 @@ void updateGame() {
         }
     }
 
-    hOff++;
+    hOff0++;
+    hOff1++;
 
 
     timer++;
@@ -1586,20 +1645,31 @@ void updateGame() {
     updateMates();
 
     if (!(isCheat)) {
+
         updateLizard();
 
         updateFireball();
+
     }
 
     updateHeart();
+
+    updateScore();
+
+    alphaBlending();
+
 }
 
 void drawGame() {
 
     if(!(isCheat)) {
+
         drawCasanova();
+
     } else {
+
         drawCasanovaCheat();
+
     }
 
     drawMates();
@@ -1610,17 +1680,22 @@ void drawGame() {
 
     drawHeart();
 
-    waitForVBlank();
+    drawScore(0, 2);
 
-    (*(volatile unsigned short *)0x04000014) = hOff / 4;
-    (*(volatile unsigned short *)0x04000010) = hOff / 2;
+    drawLevel();
 
+    drawLostLife();
+
+    (*(volatile unsigned short*)0x04000054) = (((blackWeight)<<0));
     DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 512);
 }
 
 
 void initLevel2() {
-    hOff = 0;
+
+    level++;
+
+    hOff0 = 0;
     initLevel2Change = 0;
     levelChangeTimer = 0;
 
@@ -1632,10 +1707,16 @@ void initLevel2() {
 
     initFireball();
 
+    initLostLife();
+
 }
 
 void initLevel3() {
-    hOff = 0;
+
+    level++;
+
+
+    hOff0 = 0;
     initLevel3Change = 0;
     levelChangeTimer = 0;
 
@@ -1647,6 +1728,50 @@ void initLevel3() {
 
     initFireball();
 
+    initLostLife();
+
+}
+
+
+void alphaBlending() {
+    if (matesGone < 4) {
+        if (blackWeight > 0) {
+            blackWeight--;
+        }
+    } else {
+        if (alphaBlendTimer == 1) {
+            if (blackWeight == 0) {
+                alphaUp = 1;
+                alphaDown = 0;
+            } else if (blackWeight == 16) {
+                alphaDown = 1;
+                alphaUp = 0;
+            }
+            if (alphaUp) {
+                blackWeight++;
+            } else if (alphaDown) {
+                blackWeight--;
+            }
+            alphaBlendTimer = 0;
+        }
+        alphaBlendTimer++;
+    }
+}
+
+
+void drawLevel() {
+
+    shadowOAM[10].attr0 = (0<<8) | (0<<13) | (0<<14) | 0 | (0<<10);
+    shadowOAM[10].attr1 = (1<<14) | 200;
+    shadowOAM[10].attr2 = ((0)<<12) | ((10)*32+(4));
+    shadowOAM[11].attr0 = (0<<8) | (0<<13) | (0<<14) | 0 | (0<<10);
+    shadowOAM[11].attr1 = (1<<14) | 216;
+    shadowOAM[11].attr2 = ((0)<<12) | ((10)*32+(6));
+
+
+    shadowOAM[12].attr0 = (0<<8) | (0<<13) | (0<<14) | 0 | (0<<10);
+    shadowOAM[12].attr1 = (1<<14) | 228;
+    shadowOAM[12].attr2 = ((0)<<12) | ((8)*32+(2 * level));
 }
 
 
@@ -1693,23 +1818,23 @@ void updateCasanova() {
 
 
 void drawCasanova(){
-    shadowOAM[0].attr0 = (0<<8) | (0<<13) | (0<<14) | birds[0].row;
-    shadowOAM[0].attr1 = (2<<14) | birds[0].col;
-    shadowOAM[0].attr2 = ((0)<<12) | ((0 * 4)*32+(birds[0].aniState * 4));
+    shadowOAM[13].attr0 = (0<<8) | (0<<13) | (0<<14) | birds[0].row;
+    shadowOAM[13].attr1 = (2<<14) | birds[0].col;
+    shadowOAM[13].attr2 = ((0)<<12) | ((0)*32+(birds[0].aniState * 4));
 }
 
 
 void drawCasanovaCheat() {
-    shadowOAM[0].attr0 = (0<<8) | (0<<13) | (0<<14) | birds[0].row;
-    shadowOAM[0].attr1 = (2<<14) | birds[0].col;
-    shadowOAM[0].attr2 = ((0)<<12) | ((8)*32+(birds[0].aniState * 4));
+    shadowOAM[13].attr0 = (0<<8) | (0<<13) | (0<<14) | birds[0].row;
+    shadowOAM[13].attr1 = (2<<14) | birds[0].col;
+    shadowOAM[13].attr2 = ((0)<<12) | ((4)*32+(birds[0].aniState * 4));
 }
 
 
 void initMates() {
     for (int i = 1; i < 4; i++) {
-        birds[i].width = 22;
-        birds[i].height = 28;
+        birds[i].width = 24;
+        birds[i].height = 32;
         birds[i].col = 240;
         birds[i].row = rand() % 200;
         while((birds[i].row > 120) || birds[i].row < 0) {
@@ -1718,6 +1843,7 @@ void initMates() {
         birds[i].isActive = 0;
         birds[i].aniState = FBIRD1;
         birds[i].aniCounter = 0;
+        birds[i].missedTimer = 0;
     }
 }
 
@@ -1739,6 +1865,7 @@ void addMates() {
                 birds[i].isActive = 1;
                 birds[i].aniState = FBIRD1;
                 birds[i].aniCounter = 0;
+                birds[i].missedTimer = 0;
                 break;
             }
         }
@@ -1750,7 +1877,7 @@ void addMates() {
 void updateMates() {
      for (int i = 1; i < 4; i++) {
         if (birds[i].isActive) {
-            birds[i].col--;
+            birds[i].col --;
             if (isCheat) {
                 birds[i].row = birds[0].row;
             }
@@ -1763,9 +1890,11 @@ void updateMates() {
                 birds[i].aniCounter = 0;
             }
             if (birds[i].col == 0) {
+
+                addLostLife(birds[i].col, birds[i].row);
+                playSoundB(missedMate, 5615 - 125, 0);
                 birds[i].isActive = 0;
                 matesGone++;
-
             }
             if((collision(birds[0].col, birds[0].row, birds[0].width,
             birds[0].height, birds[i].col, birds[i].row, birds[i].width, birds[i].height))) {
@@ -1789,11 +1918,11 @@ void updateMates() {
 void drawMates() {
     for(int i = 1; i < 4; i++) {
         if (birds[i].isActive) {
-            shadowOAM[i].attr0 = (0<<8) | (0<<13) | (0<<14) | birds[i].row;
-            shadowOAM[i].attr1 = (2<<14) | birds[i].col;
-            shadowOAM[i].attr2 = ((0)<<12) | ((0 * 4)*32+(birds[i].aniState * 4));
+            shadowOAM[13+i].attr0 = (0<<8) | (0<<13) | (0<<14) | birds[i].row;
+            shadowOAM[13+i].attr1 = (2<<14) | birds[i].col;
+            shadowOAM[13+i].attr2 = ((0)<<12) | ((0)*32+(birds[i].aniState * 4));
         } else {
-            shadowOAM[i].attr0 = (2<<8);
+            shadowOAM[13+i].attr0 = (2<<8);
         }
     }
 }
@@ -1809,7 +1938,7 @@ void initLizard() {
             lizard[i].row = rand() % 200;
         }
         lizard[i].isActive = 0;
-        lizard[i].aniState = L1;
+        lizard[i].aniState = LIZARD1;
         lizard[i].aniCounter = 0;
     }
 }
@@ -1826,18 +1955,11 @@ void addLizard() {
                         lizard[i].row = rand() % 200;
                     }
                     lizard[i].isActive = 1;
-                    lizard[i].aniState = L1;
+                    lizard[i].aniState = LIZARD1;
                     lizard[i].aniCounter = 0;
 
                     if (level3) {
-                        for (int j = 0; j < 9; j++) {
-                            if(!fireball[j].isActive) {
-                                fireball[j].col = lizard[i].col;
-                                fireball[j].row = lizard[i].row + 8;
-                                fireball[j].isActive = 1;
-                                break;
-                            }
-                        }
+                        addFireball(i);
                     }
                     break;
                 }
@@ -1854,7 +1976,7 @@ void addLizard() {
                         lizard[i].row = rand() % 200;
                     }
                     lizard[i].isActive = 1;
-                    lizard[i].aniState = L1;
+                    lizard[i].aniState = LIZARD1;
                     lizard[i].aniCounter = 0;
                     break;
                 }
@@ -1878,22 +2000,23 @@ void updateLizard() {
                 if (lizard[i].col == 0) {
                     lizard[i].isActive = 0;
                 } else {
-                    lizard[i].col--;
+                    lizard[i].col -= 1.0001;
                 }
             }
             if (lizard[i].aniCounter == 8) {
-                if (lizard[i].aniState != L3) {
+                if (lizard[i].aniState != LIZARD3) {
                     lizard[i].aniState++;
                 } else {
-                    lizard[i].aniState = L1;
+                    lizard[i].aniState = LIZARD1;
                 }
                 lizard[i].aniCounter = 0;
             }
             if((collision(birds[0].col, birds[0].row, birds[0].width,
             birds[0].height, lizard[i].col, lizard[i].row, lizard[i].width, lizard[i].height))) {
+                addLostLife(lizard[i].col, lizard[i].row);
+                playSoundB(missedMate, 5615 - 125, 0);
                 lizard[i].isActive = 0;
                 matesGone++;
-
             }
             lizard[i].aniCounter++;
         }
@@ -1904,11 +2027,11 @@ void updateLizard() {
 void drawLizard() {
     for (int i = 0; i < 3; i++) {
         if ((lizard[i].isActive) && !(isCheat)) {
-            shadowOAM[4+i].attr0 = (0<<8) | (0<<13) | (0<<14) | lizard[i].row;
-            shadowOAM[4+i].attr1 = (2<<14) | lizard[i].col;
-            shadowOAM[4+i].attr2 = ((0)<<12) | ((4)*32+(lizard[i].aniState * 4));
+            shadowOAM[17+i].attr0 = (0<<8) | (0<<13) | (0<<14) | lizard[i].row;
+            shadowOAM[17+i].attr1 = (2<<14) | lizard[i].col;
+            shadowOAM[17+i].attr2 = ((0)<<12) | ((4)*32+((lizard[i].aniState + 3) * 4));
         } else {
-            shadowOAM[4+i].attr0 = (2<<8);
+            shadowOAM[17+i].attr0 = (2<<8);
         }
     }
 }
@@ -1928,21 +2051,32 @@ void initFireball() {
 }
 
 
-void updateFireball() {
-    if (level3) {
-        for(int j = 0; j < 9; j++) {
-            if (fireball[j].isActive) {
-                if (fireball[j].col < 3) {
-                    fireball[j].isActive = 0;
-                } else {
-                    fireball[j].col = fireball[j].col - 3;
-                }
-                if((collision(birds[0].col, birds[0].row, birds[0].width,
-                birds[0].height, fireball[j].col, fireball[j].row, fireball[j].width,fireball[j].height))) {
-                    fireball[j].isActive = 0;
-                    matesGone++;
+void addFireball(int i) {
+    for (int j = 0; j < 9; j++) {
+        if(!fireball[j].isActive) {
+            fireball[j].col = lizard[i].col;
+            fireball[j].row = lizard[i].row + 8;
+            fireball[j].isActive = 1;
+            break;
+        }
+    }
+}
 
-                }
+
+void updateFireball() {
+    for(int i = 0; i < 9; i++) {
+        if (fireball[i].isActive) {
+            if (fireball[i].col < 3) {
+                fireball[i].isActive = 0;
+            } else {
+                fireball[i].col = fireball[i].col - 3;
+            }
+            if((collision(birds[0].col, birds[0].row, birds[0].width,
+            birds[0].height, fireball[i].col, fireball[i].row, fireball[i].width,fireball[i].height))) {
+                addLostLife(fireball[i].col, fireball[i].row);
+                playSoundB(missedMate, 5615 - 125, 0);
+                fireball[i].isActive = 0;
+                matesGone++;
             }
         }
     }
@@ -1952,11 +2086,11 @@ void updateFireball() {
 void drawFireball() {
     for (int i = 0; i < 9; i++) {
         if ((fireball[i].isActive) &&!(isCheat)) {
-            shadowOAM[7+i].attr0 = (0<<8) | (0<<13) | (0<<14) | fireball[i].row;
-            shadowOAM[7+i].attr1 = (1<<14) | fireball[i].col;
-            shadowOAM[7+i].attr2 = ((0)<<12) | ((6)*32+(12));
+            shadowOAM[20+i].attr0 = (0<<8) | (0<<13) | (0<<14) | fireball[i].row;
+            shadowOAM[20+i].attr1 = (1<<14) | fireball[i].col;
+            shadowOAM[20+i].attr2 = ((0)<<12) | ((10)*32+(20));
         } else {
-            shadowOAM[7+i].attr0 = (2<<8);
+            shadowOAM[20+i].attr0 = (2<<8);
         }
     }
 }
@@ -1976,7 +2110,7 @@ void initHeart() {
 void updateHeart() {
     for (int i = 5 - 1; i > ((5 - 1) - matesGone); i--){
         if (heart[i].isActive) {
-            playSoundB(missedMate, 2941, 0);
+
             heart[i].isActive = 0;
         }
     }
@@ -1986,14 +2120,116 @@ void updateHeart() {
 void drawHeart() {
      for (int i = 0; i < 5; i++) {
         if (heart[i].isActive) {
-            shadowOAM[15+i].attr0 = (0<<8) | (0<<13) | (0<<14) | heart[i].row;
-            shadowOAM[15+i].attr1 = (1<<14) | heart[i].col;
-            shadowOAM[15+i].attr2 = ((0)<<12) | ((4)*32+(12));
+            shadowOAM[5+i].attr0 = (0<<8) | (0<<13) | (0<<14) | heart[i].row;
+            shadowOAM[5+i].attr1 = (1<<14) | heart[i].col;
+            shadowOAM[5+i].attr2 = ((0)<<12) | ((8)*32+(20));
         } else {
-            shadowOAM[15+i].attr0 = (0<<8) | (0<<13) | (0<<14) | heart[i].row;
-            shadowOAM[15+i].attr1 = (1<<14) | heart[i].col;
-            shadowOAM[15+i].attr2 = ((0)<<12) | ((4)*32+(14));
+            shadowOAM[5+i].attr0 = (0<<8) | (0<<13) | (0<<14) | heart[i].row;
+            shadowOAM[5+i].attr1 = (1<<14) | heart[i].col;
+            shadowOAM[5+i].attr2 = ((0)<<12) | ((8)*32+(22));
+        }
+    }
+}
+
+
+void initScore() {
+    ones = 0;
+    tens = 0;
+    hundreds = 0;
+
+}
+
+
+void updateScore() {
+    ones = matesKissed % 10;
+    if (matesKissed > 9) {
+        if (matesKissed > 99){
+            hundreds = matesKissed / 100;
+            tens = (matesKissed - (hundreds * 100) - ones) / 10;
+        } else {
+            tens = (matesKissed - ones) / 10;
         }
     }
 
+}
+
+
+void drawScore(int scorePlaceRow, int scorePlaceCol) {
+
+
+    shadowOAM[0].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
+    shadowOAM[0].attr1 = (1<<14) | scorePlaceCol;
+    shadowOAM[0].attr2 = ((0)<<12) | ((10)*32+(0));
+    shadowOAM[1].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
+    shadowOAM[1].attr1 = (1<<14) | (scorePlaceCol + 16);
+    shadowOAM[1].attr2 = ((0)<<12) | ((10)*32+(2));
+
+
+    if (matesKissed > 9) {
+        if (matesKissed > 99) {
+            shadowOAM[4].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
+            shadowOAM[4].attr1 = (1<<14) | (scorePlaceCol + 30);
+            shadowOAM[4].attr2 = ((0)<<12) | ((8)*32+(2 * hundreds));
+            shadowOAM[3].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
+            shadowOAM[3].attr1 = (1<<14) | (scorePlaceCol + 35);
+            shadowOAM[3].attr2 = ((0)<<12) | ((8)*32+(2 * tens));
+            shadowOAM[2].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
+            shadowOAM[2].attr1 = (1<<14) | (scorePlaceCol + 40);
+            shadowOAM[2].attr2 = ((0)<<12) | ((8)*32+(2 * ones));
+        } else {
+            shadowOAM[3].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
+            shadowOAM[3].attr1 = (1<<14) | (scorePlaceCol + 30);
+            shadowOAM[3].attr2 = ((0)<<12) | ((8)*32+(2 * tens));
+            shadowOAM[2].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
+            shadowOAM[2].attr1 = (1<<14) | (scorePlaceCol + 35);
+            shadowOAM[2].attr2 = ((0)<<12) | ((8)*32+(2 * ones));
+        }
+    } else {
+        shadowOAM[2].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow ;
+        shadowOAM[2].attr1 = (1<<14) | (scorePlaceCol + 30);
+        shadowOAM[2].attr2 = ((0)<<12) | ((8)*32+(2 * ones));
+    }
+}
+
+void initLostLife() {
+    for (int i = 0; i < 5; i++) {
+        lostLife[i].row = 0;
+     lostLife[i].col = 0;
+        lostLife[i].missedTimer = 0;
+        lostLife[i].isActive = 0;
+    }
+}
+
+void addLostLife(int col, int row) {
+     for (int i = 0; i < 5; i++) {
+        if(!lostLife[i].isActive) {
+            if (row < 16) {
+                row = row + 5;
+            } else if (row > 144) {
+                row = row - 5;
+            }
+            lostLife[i].row = row;
+            lostLife[i].col = col + 5;
+            lostLife[i].missedTimer = 0;
+            lostLife[i].isActive = 1;
+            break;
+        }
+    }
+}
+
+void drawLostLife() {
+    for (int i = 0; i < 5; i++) {
+        if(lostLife[i].isActive) {
+            if(lostLife[i].missedTimer < 50) {
+                shadowOAM[29+i].attr0 = (0<<8) | (0<<13) | (0<<14) | lostLife[i].row ;
+                shadowOAM[29+i].attr1 = (1<<14) | lostLife[i].col;
+                shadowOAM[29+i].attr2 = ((0)<<12) | ((8)*32+(22));
+                lostLife[i].missedTimer++;
+            } else {
+                lostLife[i].isActive = 0;
+            }
+        } else {
+            shadowOAM[29+i].attr0 = (2<<8);
+        }
+    }
 }

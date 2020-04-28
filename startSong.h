@@ -1,7 +1,7 @@
 #ifndef __STARTSONGH__
 #define __STARTSONGH__
 
-#define STARTSONGLEN 336081
-extern const signed char startSong[336081];
+#define STARTSONGLEN 136568
+extern const signed char startSong[136568];
 
 #endif

@@ -2,7 +2,6 @@
 # 1 "<built-in>"
 # 1 "<command-line>"
 # 1 "main.c"
-# 21 "main.c"
 # 1 "myLib.h" 1
 
 
@@ -110,17 +109,27 @@ typedef struct{
 
 
 int collision(int colA, int rowA, int widthA, int heightA, int colB, int rowB, int widthB, int heightB);
-# 22 "main.c" 2
+# 2 "main.c" 2
 # 1 "start.h" 1
 # 22 "start.h"
-extern const unsigned short startTiles[3472];
+extern const unsigned short startTiles[3024];
 
 
 extern const unsigned short startMap[1024];
 
 
 extern const unsigned short startPal[256];
-# 23 "main.c" 2
+# 3 "main.c" 2
+# 1 "skystart.h" 1
+# 22 "skystart.h"
+extern const unsigned short skystartTiles[2608];
+
+
+extern const unsigned short skystartMap[1024];
+
+
+extern const unsigned short skystartPal[256];
+# 4 "main.c" 2
 # 1 "instructions.h" 1
 # 22 "instructions.h"
 extern const unsigned short instructionsTiles[6480];
@@ -130,17 +139,37 @@ extern const unsigned short instructionsMap[1024];
 
 
 extern const unsigned short instructionsPal[16];
-# 24 "main.c" 2
+# 5 "main.c" 2
+# 1 "instructionsnew.h" 1
+# 22 "instructionsnew.h"
+extern const unsigned short instructionsnewTiles[16032];
+
+
+extern const unsigned short instructionsnewMap[2048];
+
+
+extern const unsigned short instructionsnewPal[256];
+# 6 "main.c" 2
+# 1 "skyinstructions.h" 1
+# 22 "skyinstructions.h"
+extern const unsigned short skyinstructionsTiles[15840];
+
+
+extern const unsigned short skyinstructionsMap[4096];
+
+
+extern const unsigned short skyinstructionsPal[256];
+# 7 "main.c" 2
 # 1 "sky.h" 1
 # 22 "sky.h"
-extern const unsigned short skyTiles[2608];
+extern const unsigned short skyTiles[2592];
 
 
 extern const unsigned short skyMap[1024];
 
 
 extern const unsigned short skyPal[256];
-# 25 "main.c" 2
+# 8 "main.c" 2
 # 1 "game.h" 1
 
 void initGame();
@@ -148,6 +177,8 @@ void updateGame();
 void drawGame();
 void initLevel2();
 void initLevel3();
+void updateLevel();
+void drawLevel();
 void initCasanova();
 void updateCasanova();
 void drawCasanova();
@@ -160,15 +191,29 @@ void initLizard();
 void addLizard();
 void updateLizard();
 void drawLizard();
+void addFireball();
 void initFireball();
 void updateFireball();
 void drawFireball();
 void initHeart();
 void updateHeart();
 void drawHeart();
+void initLostLife();
+void addLostLife();
+void drawLostLife();
+void initScore();
+void updateScore();
+void drawScore();
+void alphaBlending();
 
 
-unsigned short hOff;
+
+unsigned short vOff0;
+unsigned short vOff1;
+
+
+unsigned short hOff0;
+unsigned short hOff1;
 
 
 typedef struct {
@@ -178,6 +223,7 @@ typedef struct {
     int height;
     int aniState;
     int aniCounter;
+    int missedTimer;
     int isActive;
 } BIRD;
 
@@ -189,6 +235,7 @@ typedef struct {
     int height;
     int aniState;
     int aniCounter;
+    int missedTimer;
     int isActive;
 } LIZARD;
 
@@ -209,20 +256,29 @@ typedef struct {
     int height;
     int isActive;
 } HEART;
-# 83 "game.h"
+
+
+typedef struct {
+    int row;
+ int col;
+    int missedTimer;
+    int isActive;
+} LOSTLIFE;
+# 111 "game.h"
 int timer;
 
 
 int lTimer;
 
 
-int fTimer;
-
-
 int matesGone;
 
 
-int activeLizard;
+int alphaBlendTimer;
+
+
+int alphaUp;
+int alphaDown;
 
 
 int initLevel2Change;
@@ -233,102 +289,162 @@ int level2;
 int level3;
 
 
+int level;
+
+
 int levelChangeTimer;
+
+int lRow;
+int lCol;
 
 
 int matesKissed;
 
 
 int isCheat;
-# 26 "main.c" 2
+# 159 "game.h"
+int blackWeight;
+
+
+int ones;
+int tens;
+int hundreds;
+# 9 "main.c" 2
 # 1 "pause.h" 1
 # 22 "pause.h"
-extern const unsigned short pauseTiles[1200];
+extern const unsigned short pauseTiles[2816];
 
 
 extern const unsigned short pauseMap[1024];
 
 
 extern const unsigned short pausePal[256];
-# 27 "main.c" 2
+# 10 "main.c" 2
+# 1 "skypause.h" 1
+# 22 "skypause.h"
+extern const unsigned short skypauseTiles[2592];
+
+
+extern const unsigned short skypauseMap[1024];
+
+
+extern const unsigned short skypausePal[256];
+# 11 "main.c" 2
 # 1 "lose.h" 1
 # 22 "lose.h"
-extern const unsigned short loseTiles[1712];
+extern const unsigned short loseTiles[2960];
 
 
 extern const unsigned short loseMap[1024];
 
 
 extern const unsigned short losePal[256];
-# 28 "main.c" 2
+# 12 "main.c" 2
+# 1 "skylose.h" 1
+# 22 "skylose.h"
+extern const unsigned short skyloseTiles[2608];
+
+
+extern const unsigned short skyloseMap[1024];
+
+
+extern const unsigned short skylosePal[256];
+# 13 "main.c" 2
 # 1 "level2.h" 1
 # 22 "level2.h"
-extern const unsigned short level2Tiles[464];
+extern const unsigned short level2Tiles[864];
 
 
 extern const unsigned short level2Map[1024];
 
 
 extern const unsigned short level2Pal[256];
-# 29 "main.c" 2
+# 14 "main.c" 2
+# 1 "skylevel2.h" 1
+# 22 "skylevel2.h"
+extern const unsigned short skylevel2Tiles[2608];
+
+
+extern const unsigned short skylevel2Map[1024];
+
+
+extern const unsigned short skylevel2Pal[256];
+# 15 "main.c" 2
 # 1 "level3.h" 1
 # 22 "level3.h"
-extern const unsigned short level3Tiles[496];
+extern const unsigned short level3Tiles[896];
 
 
 extern const unsigned short level3Map[1024];
 
 
 extern const unsigned short level3Pal[256];
-# 30 "main.c" 2
+# 16 "main.c" 2
+# 1 "skylevel3.h" 1
+# 22 "skylevel3.h"
+extern const unsigned short skylevel3Tiles[2608];
+
+
+extern const unsigned short skylevel3Map[1024];
+
+
+extern const unsigned short skylevel3Pal[256];
+# 17 "main.c" 2
 # 1 "spritesheet.h" 1
 # 21 "spritesheet.h"
 extern const unsigned short spritesheetTiles[16384];
 
 
-extern const unsigned short spritesheetPal[16];
-# 31 "main.c" 2
-# 1 "treetop.h" 1
-# 22 "treetop.h"
-extern const unsigned short treetopTiles[3152];
-
-
-extern const unsigned short treetopMap[2048];
-
-
-extern const unsigned short treetopPal[16];
-# 32 "main.c" 2
+extern const unsigned short spritesheetPal[256];
+# 18 "main.c" 2
 # 1 "newtree.h" 1
 # 22 "newtree.h"
-extern const unsigned short newtreeTiles[3632];
+extern const unsigned short newtreeTiles[3616];
 
 
 extern const unsigned short newtreeMap[2048];
 
 
 extern const unsigned short newtreePal[256];
-# 33 "main.c" 2
+# 19 "main.c" 2
+# 1 "tree.h" 1
+# 22 "tree.h"
+extern const unsigned short treeTiles[3616];
+
+
+extern const unsigned short treeMap[2048];
+
+
+extern const unsigned short treePal[256];
+# 20 "main.c" 2
 # 1 "startSong.h" 1
 
 
 
 
-extern const signed char startSong[336081];
-# 34 "main.c" 2
+extern const signed char startSong[136568];
+# 21 "main.c" 2
 # 1 "gameSong.h" 1
 
 
 
 
-extern const signed char gameSong[170114];
-# 35 "main.c" 2
+extern const signed char gameSong[158449];
+# 22 "main.c" 2
 # 1 "loseSong.h" 1
 
 
 
 
-extern const signed char loseSong[215998];
-# 36 "main.c" 2
+extern const signed char loseSong[151200];
+# 23 "main.c" 2
+# 1 "pauseSong.h" 1
+
+
+
+
+extern const signed char pauseSong[169344];
+# 24 "main.c" 2
 # 1 "sound.h" 1
 SOUND soundA;
 SOUND soundB;
@@ -345,7 +461,10 @@ void interruptHandler();
 void pauseSound();
 void unpauseSound();
 void stopSound();
-# 37 "main.c" 2
+void pauseSoundA();
+void unpauseSoundA();
+void stopSoundB();
+# 25 "main.c" 2
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 1 3
 # 10 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 3
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/machine/ieeefp.h" 1 3
@@ -1154,7 +1273,7 @@ extern long double _strtold_r (struct _reent *, const char *restrict, char **res
 extern long double strtold (const char *restrict, char **restrict);
 # 336 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 3
 
-# 38 "main.c" 2
+# 26 "main.c" 2
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdio.h" 1 3
 # 36 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdio.h" 3
 # 1 "/opt/devkitpro/devkitARM/lib/gcc/arm-none-eabi/9.1.0/include/stddef.h" 1 3 4
@@ -1565,11 +1684,11 @@ _putchar_unlocked(int _c)
 }
 # 797 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdio.h" 3
 
-# 39 "main.c" 2
+# 27 "main.c" 2
 
 
 
-# 41 "main.c"
+# 29 "main.c"
 void initialize();
 
 
@@ -1601,7 +1720,11 @@ SOUND soundB;
 
 
 enum {START, GAME, PAUSE, INSTRUCTIONS, LOSE, LEVEL2, LEVEL3};
-int state = 0;
+int state;
+
+
+int screenBlockBG0;
+int screenBlockBG1;
 
 int main() {
 
@@ -1611,6 +1734,11 @@ int main() {
 
         oldButtons = buttons;
         buttons = (*(volatile unsigned short *)0x04000130);
+
+        (*(volatile unsigned short *)0x04000010) = hOff0 / 2;
+        (*(volatile unsigned short *)0x04000014) = hOff1 / 4;
+        (*(volatile unsigned short *)0x04000012) = vOff0;
+        (*(volatile unsigned short *)0x04000016) = vOff1;
 
         switch (state) {
         case START:
@@ -1637,6 +1765,8 @@ int main() {
         default:
             break;
         }
+
+        waitForVBlank();
  }
 
     return 0;
@@ -1645,38 +1775,60 @@ int main() {
 
 void initialize() {
 
-    (*(unsigned short *)0x4000000) = 0 | (1<<8) | (1<<12);
+    (*(unsigned short *)0x4000000) = 0 | (1<<8) | (1<<9) | (1<<12);
 
-    (*(volatile unsigned short*)0x4000008) = ((0)<<2) | ((28)<<8) | (0<<7) | (3<<14);
+    (*(volatile unsigned short*)0x4000008) = ((0)<<2) | ((28)<<8) | (0<<7) | (0<<14);
+
+    (*(volatile unsigned short*)0x400000A) = ((1)<<2) | ((30)<<8) | (0<<7) | (0<<14);
 
     setupSounds();
  setupInterrupts();
 
-    goToStart();
-
     seed = 0;
+    hOff0 = 0;
+    hOff1 = 0;
+    vOff0 = 0;
+    vOff1 = 0;
+    screenBlockBG0 = 26;
+    screenBlockBG1 = 4;
+
+    goToStart();
 }
 
 
 void goToStart() {
-    DMANow(3, startPal, ((unsigned short *)0x5000000), 16);
-    DMANow(3, startTiles, &((charblock *)0x6000000)[0], 6944 / 2);
-    DMANow(3, startMap, &((screenblock *)0x6000000)[28], 1024 * 4);
 
-    playSoundA(startSong, 336081, 1);
+
+    DMANow(3, skystartPal, ((unsigned short *)0x5000000), 512);
+
+    DMANow(3, skystartTiles, &((charblock *)0x6000000)[1], 5216);
+
+    DMANow(3, skystartMap, &((screenblock *)0x6000000)[30], 2048);
+
+
+    DMANow(3, startTiles, &((charblock *)0x6000000)[0], 6048);
+
+    DMANow(3, startMap, &((screenblock *)0x6000000)[28], 2048);
+
+
 
     state = START;
+
+    hideSprites();
+    DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 512);
+
 }
 
 
 void start() {
 
     seed++;
+    hOff1++;
 
     if((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
         srand(seed);
         stopSound();
-        playSoundA(gameSong, 170114, 1);
+
         initGame();
         goToGame();
     }
@@ -1696,24 +1848,23 @@ void goToGame() {
 
     (*(volatile unsigned short*)0x400000A) = ((1)<<2) | ((30)<<8) | (0<<7) | (0<<14);
 
-    DMANow(3, skyTiles, &((charblock *)0x6000000)[1], 5216);
+    DMANow(3, skyTiles, &((charblock *)0x6000000)[1], 5184);
 
     DMANow(3, skyMap, &((screenblock *)0x6000000)[30], 2048);
 
 
     (*(volatile unsigned short*)0x4000008) = ((0)<<2) | ((28)<<8) | (0<<7) | (1<<14);
 
-    DMANow(3, newtreeTiles, &((charblock *)0x6000000)[0], 7264 / 2);
+    DMANow(3, treeTiles, &((charblock *)0x6000000)[0], 7232 / 2);
 
-    DMANow(3, newtreeMap, &((screenblock *)0x6000000)[28], 4096 / 2);
-
-
-
-
+    DMANow(3, treeMap, &((screenblock *)0x6000000)[28], 4096 / 2);
 
 
     DMANow(3, spritesheetPal, ((unsigned short *)0x5000200), 256);
+
     DMANow(3, spritesheetTiles, &((charblock *)0x6000000)[4], 32768 / 2);
+
+    (*(volatile unsigned short*)0x04000050) = (1<<4) | (3<<6);
 
     hideSprites();
     state = GAME;
@@ -1727,14 +1878,20 @@ void game() {
     drawGame();
 
     if((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
-        pauseSound();
+
+        stopSoundB();
+        pauseSoundA();
+
         goToPause();
     }
+
+
     if(matesGone == 5) {
         stopSound();
-        playSoundA(loseSong, 215998, 1);
+
         goToLose();
     }
+
     if(initLevel2Change) {
         goToLevel2();
     }
@@ -1747,15 +1904,16 @@ void game() {
 
 void goToLevel2() {
 
-    (*(volatile unsigned short *)0x04000010) = 0;
+    hOff0 = 0;
 
-    (*(unsigned short *)0x4000000) = 0 | (1<<8) | (1<<12);
 
-    (*(volatile unsigned short*)0x4000008) = ((0)<<2) | ((28)<<8) | (0<<7) | (3<<14);
+    DMANow(3, skylevel2Pal, ((unsigned short *)0x5000000), 256);
+    DMANow(3, skylevel2Tiles, &((charblock *)0x6000000)[1], 5216);
+    DMANow(3, skylevel2Map, &((screenblock *)0x6000000)[30], 2048);
 
-    DMANow(3, level2Pal, ((unsigned short *)0x5000000), 16);
-    DMANow(3, level2Tiles, &((charblock *)0x6000000)[0], 928 / 2);
-    DMANow(3, level2Map, &((screenblock *)0x6000000)[28], 1024 * 4);
+
+    DMANow(3, level2Tiles, &((charblock *)0x6000000)[0], 1728);
+    DMANow(3, level2Map, &((screenblock *)0x6000000)[28], 2048);
 
     hideSprites();
     DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 512);
@@ -1764,11 +1922,14 @@ void goToLevel2() {
 
 }
 
+
 void level2State() {
 
+    hOff1++;
     levelChangeTimer++;
 
-    if(levelChangeTimer == 100000) {
+
+    if(levelChangeTimer == 300) {
         initLevel2();
         goToGame();
     }
@@ -1778,15 +1939,16 @@ void level2State() {
 
 void goToLevel3() {
 
-    (*(volatile unsigned short *)0x04000010) = 0;
+    hOff0 = 0;
 
-    (*(unsigned short *)0x4000000) = 0 | (1<<8) | (1<<12);
 
-    (*(volatile unsigned short*)0x4000008) = ((0)<<2) | ((28)<<8) | (0<<7) | (3<<14);
+    DMANow(3, skylevel3Pal, ((unsigned short *)0x5000000), 256);
+    DMANow(3, skylevel3Tiles, &((charblock *)0x6000000)[1], 5216);
+    DMANow(3, skylevel3Map, &((screenblock *)0x6000000)[30], 2048);
 
-    DMANow(3, level3Pal, ((unsigned short *)0x5000000), 16);
-    DMANow(3, level3Tiles, &((charblock *)0x6000000)[0], 992 / 2);
-    DMANow(3, level3Map, &((screenblock *)0x6000000)[28], 1024 * 4);
+
+    DMANow(3, level3Tiles, &((charblock *)0x6000000)[0], 1792);
+    DMANow(3, level3Map, &((screenblock *)0x6000000)[28], 2048);
 
     hideSprites();
     DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 512);
@@ -1797,9 +1959,11 @@ void goToLevel3() {
 
 void level3State() {
 
+    hOff1++;
     levelChangeTimer++;
 
-    if(levelChangeTimer == 100000) {
+
+    if(levelChangeTimer == 300) {
         initLevel3();
         goToGame();
     }
@@ -1809,15 +1973,16 @@ void level3State() {
 
 void goToPause() {
 
-    (*(volatile unsigned short *)0x04000010) = 0;
+    hOff0 = 0;
 
-    (*(unsigned short *)0x4000000) = 0 | (1<<8) | (1<<12);
 
-    (*(volatile unsigned short*)0x4000008) = ((0)<<2) | ((28)<<8) | (0<<7) | (3<<14);
+    DMANow(3, skypausePal, ((unsigned short *)0x5000000), 512);
+    DMANow(3, skypauseTiles, &((charblock *)0x6000000)[1], 5184);
+    DMANow(3, skypauseMap, &((screenblock *)0x6000000)[30], 2048);
 
-    DMANow(3, pausePal, ((unsigned short *)0x5000000), 16);
-    DMANow(3, pauseTiles, &((charblock *)0x6000000)[0], 2400 / 2);
-    DMANow(3, pauseMap, &((screenblock *)0x6000000)[28], 1024 * 4);
+
+    DMANow(3, pauseTiles, &((charblock *)0x6000000)[0], 5632);
+    DMANow(3, pauseMap, &((screenblock *)0x6000000)[28], 2048);
 
     hideSprites();
     DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 512);
@@ -1826,52 +1991,104 @@ void goToPause() {
 
 
 void pause() {
+
+    hOff1++;
+
     if((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
-        unpauseSound();
+        stopSoundB();
+        unpauseSoundA();
         goToGame();
+    }
+    if((!(~(oldButtons)&((1<<2))) && (~buttons & ((1<<2))))) {
+        stopSound();
+
+        goToLose();
     }
 }
 
 
 void goToInstructions() {
-    DMANow(3, instructionsPal, ((unsigned short *)0x5000000), 16);
-    DMANow(3, instructionsTiles, &((charblock *)0x6000000)[0], 12960 / 2);
-    DMANow(3, instructionsMap, &((screenblock *)0x6000000)[28], 1024 * 4);
+
+
+
+
+    hOff0 = 0;
+
+    (*(unsigned short *)0x4000000) = 0 | (1<<8) | (1<<12);
+
+
+    (*(volatile unsigned short*)0x4000008) = ((0)<<2) | ((28)<<8) | (2<<14) | (0<<7);
+
+
+
+
+    DMANow(3, instructionsnewPal, ((unsigned short *)0x5000000), 512);
+
+
+    DMANow(3, instructionsnewTiles, &((charblock *)0x6000000)[0], 32064);
+    DMANow(3, instructionsnewMap, &((screenblock *)0x6000000)[28], 4096);
 
     state = INSTRUCTIONS;
 }
 
 
 void instructions() {
+
     if((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
         stopSound();
-        playSoundA(gameSong, 170114, 1);
+
+        vOff0 = 0;
         initGame();
         goToGame();
     }
+
+
+    if((~((*(volatile unsigned short *)0x04000130)) & ((1<<7)))) {
+        if(vOff0 < 512-160-1) {
+            vOff0++;
+        }
+
+
+
+
+    }
+
+
+    if((~((*(volatile unsigned short *)0x04000130)) & ((1<<6)))) {
+        if (vOff0 > 0) {
+            vOff0--;
+        }
+    }
+# 414 "main.c"
 }
 
 
 void goToLose() {
 
-    (*(volatile unsigned short *)0x04000010) = 0;
+    hOff0 = 0;
 
-    (*(unsigned short *)0x4000000) = 0 | (1<<8) | (1<<12);
 
-    (*(volatile unsigned short*)0x4000008) = ((0)<<2) | ((28)<<8) | (0<<7) | (3<<14);
+    DMANow(3, skylosePal, ((unsigned short *)0x5000000), 512);
+    DMANow(3, skyloseTiles, &((charblock *)0x6000000)[1], 5216);
+    DMANow(3, skyloseMap, &((screenblock *)0x6000000)[30], 2048);
 
-    DMANow(3, losePal, ((unsigned short *)0x5000000), 16);
-    DMANow(3, loseTiles, &((charblock *)0x6000000)[0], 3424 / 2);
-    DMANow(3, loseMap, &((screenblock *)0x6000000)[28], 1024 * 4);
+
+    DMANow(3, loseTiles, &((charblock *)0x6000000)[0], 5920);
+    DMANow(3, loseMap, &((screenblock *)0x6000000)[28], 2048);
 
     hideSprites();
+    drawScore(135, 104);
     DMANow(3, shadowOAM, ((OBJ_ATTR*)(0x7000000)), 512);
     state = LOSE;
 }
 
 
 void lose() {
+
+    hOff1++;
+
     if((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
         goToStart();
     }
+
 }

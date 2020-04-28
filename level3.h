@@ -5,11 +5,11 @@
 //
 //	level3, 256x256@4, 
 //	+ palette 256 entries, not compressed
-//	+ 31 tiles (t|f|p reduced) not compressed
+//	+ 56 tiles (t|f|p reduced) not compressed
 //	+ regular map (in SBBs), not compressed, 32x32 
-//	Total size: 512 + 992 + 2048 = 3552
+//	Total size: 512 + 1792 + 2048 = 4352
 //
-//	Time-stamp: 2020-04-12, 16:50:26
+//	Time-stamp: 2020-04-28, 14:49:36
 //	Exported by Cearn's GBA Image Transmogrifier, v0.8.3
 //	( http://www.coranac.com/projects/#grit )
 //
@@ -18,8 +18,8 @@
 #ifndef GRIT_LEVEL3_H
 #define GRIT_LEVEL3_H
 
-#define level3TilesLen 992
-extern const unsigned short level3Tiles[496];
+#define level3TilesLen 1792
+extern const unsigned short level3Tiles[896];
 
 #define level3MapLen 2048
 extern const unsigned short level3Map[1024];
