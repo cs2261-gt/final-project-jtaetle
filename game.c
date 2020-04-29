@@ -1,7 +1,5 @@
 #include "myLib.h"
 #include "game.h"
-#include "sky.h"
-#include "treetop.h"
 #include "spritesheet.h"
 #include "sound.h"
 #include "missedMate.h"
@@ -83,10 +81,15 @@ void initGame() {
     //initialize cheat
     isCheat = 0;
 
+    //initialize alpha weight
     blackWeight = 16;
 
+    //initialize alpha indicator
     alphaUp = 0;
     alphaDown = 0;
+
+    //initialize gamehOff0
+    gamehOff0 = 0;
 
 }
 
@@ -117,17 +120,15 @@ void updateGame() {
 
     addMates();
 
-    if (!(isCheat)) {
-        //update lizard timer
-        lTimer++;
-        addLizard();
-    }
+    //update lizard timer
+    lTimer++;
+    addLizard();
 
     updateMates();
 
-    if (!(isCheat)) {
+    updateLizard();
 
-        updateLizard();
+    if (!(isCheat)) {
 
         updateFireball();
 
@@ -161,9 +162,9 @@ void drawGame() {
 
     drawHeart();
 
-    drawScore(0, 2);
+    drawScore(2, 0);
     
-    drawLevel();
+    drawLevel(200, 0);
 
     drawLostLife();
 
@@ -177,6 +178,7 @@ void initLevel2() {
     level++;
     //reset bg0 hOff
     hOff0 = 0;
+    gamehOff0 = hOff0;
     initLevel2Change = 0;
     levelChangeTimer = 0;
 
@@ -198,6 +200,7 @@ void initLevel3() {
 
     //reset bg0 hOff
     hOff0 = 0;
+    gamehOff0 = hOff0;
     initLevel3Change = 0;
     levelChangeTimer = 0;
 
@@ -239,19 +242,19 @@ void alphaBlending() {
     }
 }
 
-//draw level
-void drawLevel() {
+//draw level 200, 216, 228
+void drawLevel(int col, int row) {
     //draw LEVEL: 
-    shadowOAM[10].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | 0 | ATTR0_NOBLEND;
-    shadowOAM[10].attr1 = ATTR1_SMALL | 200;
+    shadowOAM[10].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | row | ATTR0_NOBLEND;
+    shadowOAM[10].attr1 = ATTR1_SMALL | col;
     shadowOAM[10].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(4, 10);
-    shadowOAM[11].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | 0 | ATTR0_NOBLEND;
-    shadowOAM[11].attr1 = ATTR1_SMALL | 216;
+    shadowOAM[11].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | row | ATTR0_NOBLEND;
+    shadowOAM[11].attr1 = ATTR1_SMALL | col + 16;
     shadowOAM[11].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(6, 10);
 
     //draw the actual level
-    shadowOAM[12].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | 0 | ATTR0_NOBLEND;
-    shadowOAM[12].attr1 = ATTR1_SMALL | 228;
+    shadowOAM[12].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | row | ATTR0_NOBLEND;
+    shadowOAM[12].attr1 = ATTR1_SMALL | col + 28;
     shadowOAM[12].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * level, 8);
 }
 
@@ -439,7 +442,7 @@ void addLizard() {
                     lizard[i].aniState = LIZARD1;
                     lizard[i].aniCounter = 0;
                     //add fireball
-                    if (level3) {
+                    if (level3 && !isCheat) {
                         addFireball(i);
                     }
                     break;
@@ -507,7 +510,7 @@ void updateLizard() {
 //draws lizard
 void drawLizard() {
     for (int i = 0; i < LIZARDCOUNT; i++) {
-        if ((lizard[i].isActive) && !(isCheat)) {
+        if ((lizard[i].isActive)) {
             shadowOAM[17+i].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | lizard[i].row;
             shadowOAM[17+i].attr1 = ATTR1_MEDIUM | lizard[i].col;
             shadowOAM[17+i].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID((lizard[i].aniState + 3) * 4 , 4);
@@ -612,66 +615,6 @@ void drawHeart() {
     }
 }
 
-//initialize score
-void initScore() {
-    ones = 0;
-    tens = 0;
-    hundreds = 0;
-
-}
-
-//update score
-void updateScore() {
-    ones = matesKissed % 10;
-    if (matesKissed > 9) {
-        if (matesKissed > 99){
-            hundreds = matesKissed  / 100;
-            tens = (matesKissed - (hundreds * 100) - ones) / 10;
-        } else {
-            tens = (matesKissed - ones) / 10;
-        }
-    }
-    
-}
-
-//draw score
-void drawScore(int scorePlaceRow, int scorePlaceCol) { 
-
-    //draw SCORE:
-    shadowOAM[0].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
-    shadowOAM[0].attr1 = ATTR1_SMALL | scorePlaceCol;
-    shadowOAM[0].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(0, 10);
-    shadowOAM[1].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
-    shadowOAM[1].attr1 = ATTR1_SMALL | (scorePlaceCol + 16);
-    shadowOAM[1].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2, 10);
-
-    //score
-    if (matesKissed > 9) {
-        if (matesKissed > 99) {
-            shadowOAM[4].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
-            shadowOAM[4].attr1 = ATTR1_SMALL | (scorePlaceCol + 30);
-            shadowOAM[4].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * hundreds, 8);
-            shadowOAM[3].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
-            shadowOAM[3].attr1 = ATTR1_SMALL | (scorePlaceCol + 35);
-            shadowOAM[3].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * tens, 8);
-            shadowOAM[2].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
-            shadowOAM[2].attr1 = ATTR1_SMALL | (scorePlaceCol + 40);
-            shadowOAM[2].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * ones, 8);
-        } else {
-            shadowOAM[3].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
-            shadowOAM[3].attr1 = ATTR1_SMALL | (scorePlaceCol + 30);
-            shadowOAM[3].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * tens, 8);
-            shadowOAM[2].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
-            shadowOAM[2].attr1 = ATTR1_SMALL | (scorePlaceCol + 35);
-            shadowOAM[2].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * ones, 8);
-        }    
-    } else {
-        shadowOAM[2].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow ;
-        shadowOAM[2].attr1 = ATTR1_SMALL | (scorePlaceCol + 30);
-        shadowOAM[2].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * ones, 8);
-    }
-}
-
 void initLostLife() {
     for (int i = 0; i < LOSTLIFECOUNT; i++) {
         lostLife[i].row = 0;
@@ -712,5 +655,65 @@ void drawLostLife() {
         } else {
             shadowOAM[29+i].attr0 = ATTR0_HIDE;
         }
+    }
+}
+
+//initialize score
+void initScore() {
+    ones = 0;
+    tens = 0;
+    hundreds = 0;
+
+}
+
+//update score
+void updateScore() {
+    ones = matesKissed % 10;
+    if (matesKissed > 9) {
+        if (matesKissed > 99){
+            hundreds = matesKissed  / 100;
+            tens = (matesKissed - (hundreds * 100) - ones) / 10;
+        } else {
+            tens = (matesKissed - ones) / 10;
+        }
+    }
+    
+}
+
+//draw score
+void drawScore(int scorePlaceCol, int scorePlaceRow) { 
+
+    //draw SCORE:
+    shadowOAM[0].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
+    shadowOAM[0].attr1 = ATTR1_SMALL | scorePlaceCol;
+    shadowOAM[0].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(0, 10);
+    shadowOAM[1].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
+    shadowOAM[1].attr1 = ATTR1_SMALL | (scorePlaceCol + 16);
+    shadowOAM[1].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2, 10);
+
+    //score
+    if (matesKissed > 9) {
+        if (matesKissed > 99) {
+            shadowOAM[4].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
+            shadowOAM[4].attr1 = ATTR1_SMALL | (scorePlaceCol + 30);
+            shadowOAM[4].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * hundreds, 8);
+            shadowOAM[3].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
+            shadowOAM[3].attr1 = ATTR1_SMALL | (scorePlaceCol + 35);
+            shadowOAM[3].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * tens, 8);
+            shadowOAM[2].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
+            shadowOAM[2].attr1 = ATTR1_SMALL | (scorePlaceCol + 40);
+            shadowOAM[2].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * ones, 8);
+        } else {
+            shadowOAM[3].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
+            shadowOAM[3].attr1 = ATTR1_SMALL | (scorePlaceCol + 30);
+            shadowOAM[3].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * tens, 8);
+            shadowOAM[2].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow;
+            shadowOAM[2].attr1 = ATTR1_SMALL | (scorePlaceCol + 35);
+            shadowOAM[2].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * ones, 8);
+        }    
+    } else {
+        shadowOAM[2].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | scorePlaceRow ;
+        shadowOAM[2].attr1 = ATTR1_SMALL | (scorePlaceCol + 30);
+        shadowOAM[2].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * ones, 8);
     }
 }

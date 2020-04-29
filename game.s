@@ -189,38 +189,40 @@ drawLevel:
 	@ Function supports interworking.
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, lr}
-	mov	r1, #0
+	str	lr, [sp, #-4]!
 	mov	lr, #324
 	ldr	r3, .L40
-	ldr	r2, [r3]
+	lsl	r2, r0, #16
+	ldr	ip, [r3]
+	lsl	r1, r1, #16
 	ldr	r3, .L40+4
-	add	r2, r2, #128
-	lsl	r2, r2, #1
-	ldr	r4, .L40+8
-	ldr	ip, .L40+12
-	strh	r2, [r3, #100]	@ movhi
-	ldr	r0, .L40+16
-	ldr	r2, .L40+20
-	strh	r4, [r3, #82]	@ movhi
-	strh	lr, [r3, #84]	@ movhi
-	strh	ip, [r3, #90]	@ movhi
-	strh	r0, [r3, #92]	@ movhi
-	strh	r2, [r3, #98]	@ movhi
+	lsr	r1, r1, #16
+	lsr	r2, r2, #16
+	orr	r0, r0, #16384
+	strh	r0, [r3, #82]	@ movhi
 	strh	r1, [r3, #80]	@ movhi
+	add	r0, r2, #16
 	strh	r1, [r3, #88]	@ movhi
 	strh	r1, [r3, #96]	@ movhi
-	pop	{r4, lr}
+	add	ip, ip, #128
+	ldr	r1, .L40+8
+	add	r2, r2, #28
+	lsl	ip, ip, #1
+	orr	r0, r0, #16384
+	orr	r2, r2, #16384
+	strh	lr, [r3, #84]	@ movhi
+	strh	r0, [r3, #90]	@ movhi
+	strh	r2, [r3, #98]	@ movhi
+	strh	r1, [r3, #92]	@ movhi
+	strh	ip, [r3, #100]	@ movhi
+	ldr	lr, [sp], #4
 	bx	lr
 .L41:
 	.align	2
 .L40:
 	.word	level
 	.word	shadowOAM
-	.word	16584
-	.word	16600
 	.word	326
-	.word	16612
 	.size	drawLevel, .-drawLevel
 	.align	2
 	.global	initCasanova
@@ -765,17 +767,21 @@ addLizard:
 	str	r3, [r8, r9, lsl #5]
 	bhi	.L132
 .L131:
-	mov	r2, #0
+	mov	r1, #0
 	mov	r0, #1
-	ldr	r1, .L159+24
-	ldr	r1, [r1]
-	cmp	r1, r2
-	add	r1, r8, r7
-	str	r0, [r1, #28]
-	str	r2, [r1, #16]
-	str	r2, [r1, #20]
+	ldr	r2, .L159+24
+	ldr	r2, [r2]
+	cmp	r2, r1
+	add	r2, r8, r7
+	str	r0, [r2, #28]
+	str	r1, [r2, #16]
+	str	r1, [r2, #20]
 	beq	.L130
-	ldr	ip, .L159+28
+	ldr	r2, .L159+28
+	ldr	r2, [r2]
+	cmp	r2, r1
+	bne	.L130
+	ldr	ip, .L159+32
 	mov	r1, ip
 .L135:
 	ldr	r0, [r1, #16]
@@ -850,6 +856,7 @@ addLizard:
 	.word	rand
 	.word	1374389535
 	.word	level3
+	.word	isCheat
 	.word	fireball
 	.size	addLizard, .-addLizard
 	.global	__aeabi_i2d
@@ -1015,46 +1022,37 @@ drawLizard:
 	@ Function supports interworking.
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	mov	ip, #512
-	ldr	r2, .L199
-	ldr	r3, .L199+4
 	push	{r4, r5, lr}
-	ldr	r4, [r2]
-	ldr	r5, .L199+8
-	ldr	r2, .L199+12
-	add	r0, r3, #24
+	mov	r5, #512
+	ldr	r3, .L196
+	ldr	r2, .L196+4
+	ldr	r4, .L196+8
+	add	ip, r3, #24
 .L193:
 	ldr	r1, [r2, #28]
 	cmp	r1, #0
-	beq	.L191
-	cmp	r4, #0
-	bne	.L191
-	ldr	r1, [r2, #16]
-	add	r1, r1, #35
-	lsl	r1, r1, #2
-	ldr	lr, [r2, #4]
-	strh	r1, [r3, #140]	@ movhi
-	ldr	r1, [r2]
-	orr	lr, lr, r5
-	strh	lr, [r3, #138]	@ movhi
-	strh	r1, [r3, #136]	@ movhi
-.L192:
+	ldrne	r1, [r2, #16]
+	ldrne	r0, [r2, #4]
+	ldrne	lr, [r2]
+	addne	r1, r1, #35
+	lslne	r1, r1, #2
+	orrne	r0, r0, r4
+	strhne	r1, [r3, #140]	@ movhi
+	strhne	r0, [r3, #138]	@ movhi
+	strhne	lr, [r3, #136]	@ movhi
+	strheq	r5, [r3, #136]	@ movhi
 	add	r3, r3, #8
-	cmp	r3, r0
+	cmp	r3, ip
 	add	r2, r2, #32
 	bne	.L193
 	pop	{r4, r5, lr}
 	bx	lr
-.L191:
-	strh	ip, [r3, #136]	@ movhi
-	b	.L192
-.L200:
+.L197:
 	.align	2
-.L199:
-	.word	isCheat
+.L196:
 	.word	shadowOAM
-	.word	-32768
 	.word	lizard
+	.word	-32768
 	.size	drawLizard, .-drawLizard
 	.align	2
 	.global	initFireball
@@ -1069,13 +1067,13 @@ initFireball:
 	push	{r4, r5, r6, r7, r8, r9, r10, lr}
 	mov	r9, #240
 	mov	r7, #16
-	ldr	r4, .L209
-	ldr	r6, .L209+4
-	ldr	r5, .L209+8
+	ldr	r4, .L206
+	ldr	r6, .L206+4
+	ldr	r5, .L206+8
 	add	r8, r4, #180
-.L204:
+.L201:
 	str	r9, [r4, #4]
-.L208:
+.L205:
 	mov	lr, pc
 	bx	r6
 	smull	r3, r2, r5, r0
@@ -1086,143 +1084,23 @@ initFireball:
 	sub	r3, r0, r3, lsl #3
 	cmp	r3, #120
 	str	r3, [r4]
-	bhi	.L208
+	bhi	.L205
 	mov	r3, #0
 	str	r7, [r4, #8]
 	str	r7, [r4, #12]
 	str	r3, [r4, #16]
 	add	r4, r4, #20
 	cmp	r4, r8
-	bne	.L204
+	bne	.L201
 	pop	{r4, r5, r6, r7, r8, r9, r10, lr}
 	bx	lr
-.L210:
+.L207:
 	.align	2
-.L209:
+.L206:
 	.word	fireball
 	.word	rand
 	.word	1374389535
 	.size	initFireball, .-initFireball
-	.align	2
-	.global	initGame
-	.syntax unified
-	.arm
-	.fpu softvfp
-	.type	initGame, %function
-initGame:
-	@ Function supports interworking.
-	@ args = 0, pretend = 0, frame = 0
-	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, r5, r6, lr}
-	mov	r0, #24
-	mov	r1, #32
-	mov	r2, #64
-	mov	r4, #0
-	mov	r5, #16
-	mov	r6, #1
-	ldr	r3, .L217
-	stm	r3, {r2, r5}
-	str	r0, [r3, #8]
-	str	r1, [r3, #12]
-	str	r6, [r3, #28]
-	str	r4, [r3, #16]
-	str	r4, [r3, #20]
-	bl	initMates
-	bl	initLizard
-	bl	initFireball
-	mov	r2, r4
-	mov	r1, r5
-	mov	r0, r6
-	mov	ip, #145
-	ldr	r3, .L217+4
-.L212:
-	str	r2, [r3, #4]
-	add	r2, r2, #16
-	cmp	r2, #80
-	str	ip, [r3]
-	str	r1, [r3, #8]
-	str	r1, [r3, #12]
-	str	r0, [r3, #16]
-	add	r3, r3, #20
-	bne	.L212
-	mov	r1, #0
-	ldr	lr, .L217+8
-	ldr	ip, .L217+12
-	ldr	r0, .L217+16
-	ldr	r3, .L217+20
-	mov	r2, r1
-	str	r1, [lr]
-	str	r1, [ip]
-	str	r1, [r0]
-	add	r1, r3, #80
-.L213:
-	str	r2, [r3]
-	str	r2, [r3, #4]
-	str	r2, [r3, #8]
-	str	r2, [r3, #12]
-	add	r3, r3, #16
-	cmp	r3, r1
-	bne	.L213
-	mov	r0, #95
-	mov	lr, #1
-	mov	ip, #16
-	ldr	r1, .L217+24
-	ldr	r3, .L217+28
-	str	r0, [r1]
-	str	lr, [r3]
-	ldr	r0, .L217+32
-	ldr	r1, .L217+36
-	ldr	r3, .L217+40
-	str	ip, [r0]
-	str	r2, [r1]
-	str	r2, [r3]
-	ldr	lr, .L217+44
-	ldr	ip, .L217+48
-	ldr	r0, .L217+52
-	ldr	r1, .L217+56
-	ldr	r3, .L217+60
-	str	r2, [lr]
-	str	r2, [ip]
-	ldr	lr, .L217+64
-	str	r2, [r0]
-	str	r2, [r1]
-	str	r2, [r3]
-	ldr	ip, .L217+68
-	ldr	r0, .L217+72
-	ldr	r1, .L217+76
-	ldr	r3, .L217+80
-	str	r2, [lr]
-	str	r2, [ip]
-	str	r2, [r0]
-	str	r2, [r1]
-	str	r2, [r3]
-	pop	{r4, r5, r6, lr}
-	bx	lr
-.L218:
-	.align	2
-.L217:
-	.word	birds
-	.word	heart
-	.word	ones
-	.word	tens
-	.word	hundreds
-	.word	lostLife
-	.word	timer
-	.word	level
-	.word	blackWeight
-	.word	lTimer
-	.word	levelChangeTimer
-	.word	alphaBlendTimer
-	.word	initLevel2Change
-	.word	initLevel3Change
-	.word	matesGone
-	.word	matesKissed
-	.word	level2
-	.word	level3
-	.word	isCheat
-	.word	alphaUp
-	.word	alphaDown
-	.size	initGame, .-initGame
 	.align	2
 	.global	initLevel2
 	.syntax unified
@@ -1240,17 +1118,19 @@ initLevel2:
 	mov	ip, #16
 	mov	r0, #64
 	mov	r5, #24
-	ldr	r2, .L223
+	ldr	r2, .L212
 	ldr	r3, [r2]
 	add	r3, r3, r1
 	str	r3, [r2]
-	ldr	r3, .L223+4
+	ldr	r3, .L212+4
 	strh	r4, [r3]	@ movhi
-	ldr	r3, .L223+8
+	ldr	r3, .L212+8
 	str	r4, [r3]
-	ldr	r3, .L223+12
+	ldr	r3, .L212+12
 	str	r4, [r3]
-	ldr	r3, .L223+16
+	ldr	r3, .L212+16
+	str	r4, [r3]
+	ldr	r3, .L212+20
 	str	r1, [r3, #28]
 	stm	r3, {r0, ip}
 	str	r4, [r3, #16]
@@ -1261,23 +1141,24 @@ initLevel2:
 	bl	initLizard
 	bl	initFireball
 	mov	r2, r4
-	ldr	r3, .L223+20
+	ldr	r3, .L212+24
 	add	r1, r3, #80
-.L220:
+.L209:
 	str	r2, [r3]
 	str	r2, [r3, #4]
 	str	r2, [r3, #8]
 	str	r2, [r3, #12]
 	add	r3, r3, #16
 	cmp	r3, r1
-	bne	.L220
+	bne	.L209
 	pop	{r4, r5, r6, lr}
 	bx	lr
-.L224:
+.L213:
 	.align	2
-.L223:
+.L212:
 	.word	level
 	.word	hOff0
+	.word	gamehOff0
 	.word	initLevel2Change
 	.word	levelChangeTimer
 	.word	birds
@@ -1300,17 +1181,19 @@ initLevel3:
 	mov	ip, #16
 	mov	r0, #64
 	mov	r5, #24
-	ldr	r2, .L229
+	ldr	r2, .L218
 	ldr	r3, [r2]
 	add	r3, r3, r1
 	str	r3, [r2]
-	ldr	r3, .L229+4
+	ldr	r3, .L218+4
 	strh	r4, [r3]	@ movhi
-	ldr	r3, .L229+8
+	ldr	r3, .L218+8
 	str	r4, [r3]
-	ldr	r3, .L229+12
+	ldr	r3, .L218+12
 	str	r4, [r3]
-	ldr	r3, .L229+16
+	ldr	r3, .L218+16
+	str	r4, [r3]
+	ldr	r3, .L218+20
 	str	r1, [r3, #28]
 	stm	r3, {r0, ip}
 	str	r4, [r3, #16]
@@ -1321,28 +1204,152 @@ initLevel3:
 	bl	initLizard
 	bl	initFireball
 	mov	r2, r4
-	ldr	r3, .L229+20
+	ldr	r3, .L218+24
 	add	r1, r3, #80
-.L226:
+.L215:
 	str	r2, [r3]
 	str	r2, [r3, #4]
 	str	r2, [r3, #8]
 	str	r2, [r3, #12]
 	add	r3, r3, #16
 	cmp	r3, r1
-	bne	.L226
+	bne	.L215
 	pop	{r4, r5, r6, lr}
 	bx	lr
-.L230:
+.L219:
 	.align	2
-.L229:
+.L218:
 	.word	level
 	.word	hOff0
+	.word	gamehOff0
 	.word	initLevel3Change
 	.word	levelChangeTimer
 	.word	birds
 	.word	lostLife
 	.size	initLevel3, .-initLevel3
+	.align	2
+	.global	initGame
+	.syntax unified
+	.arm
+	.fpu softvfp
+	.type	initGame, %function
+initGame:
+	@ Function supports interworking.
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 0, uses_anonymous_args = 0
+	push	{r4, r5, r6, lr}
+	mov	r0, #24
+	mov	r1, #32
+	mov	r2, #64
+	mov	r4, #0
+	mov	r5, #16
+	mov	r6, #1
+	ldr	r3, .L226
+	stm	r3, {r2, r5}
+	str	r0, [r3, #8]
+	str	r1, [r3, #12]
+	str	r6, [r3, #28]
+	str	r4, [r3, #16]
+	str	r4, [r3, #20]
+	bl	initMates
+	bl	initLizard
+	bl	initFireball
+	mov	r2, r4
+	mov	r1, r5
+	mov	r0, r6
+	mov	ip, #145
+	ldr	r3, .L226+4
+.L221:
+	str	r2, [r3, #4]
+	add	r2, r2, #16
+	cmp	r2, #80
+	str	ip, [r3]
+	str	r1, [r3, #8]
+	str	r1, [r3, #12]
+	str	r0, [r3, #16]
+	add	r3, r3, #20
+	bne	.L221
+	mov	r1, #0
+	ldr	lr, .L226+8
+	ldr	ip, .L226+12
+	ldr	r0, .L226+16
+	ldr	r3, .L226+20
+	mov	r2, r1
+	str	r1, [lr]
+	str	r1, [ip]
+	str	r1, [r0]
+	add	r1, r3, #80
+.L222:
+	str	r2, [r3]
+	str	r2, [r3, #4]
+	str	r2, [r3, #8]
+	str	r2, [r3, #12]
+	add	r3, r3, #16
+	cmp	r3, r1
+	bne	.L222
+	mov	ip, #95
+	mov	r1, #1
+	mov	lr, #16
+	ldr	r0, .L226+24
+	ldr	r3, .L226+28
+	str	ip, [r0]
+	str	r1, [r3]
+	ldr	ip, .L226+32
+	ldr	r0, .L226+36
+	ldr	r1, .L226+40
+	ldr	r3, .L226+44
+	str	lr, [ip]
+	str	r2, [r0]
+	str	r2, [r1]
+	str	r2, [r3]
+	ldr	lr, .L226+48
+	ldr	ip, .L226+52
+	ldr	r0, .L226+56
+	ldr	r1, .L226+60
+	ldr	r3, .L226+64
+	str	r2, [lr]
+	str	r2, [ip]
+	ldr	lr, .L226+68
+	str	r2, [r0]
+	str	r2, [r1]
+	str	r2, [r3]
+	ldr	ip, .L226+72
+	ldr	r0, .L226+76
+	ldr	r1, .L226+80
+	ldr	r3, .L226+84
+	str	r2, [lr]
+	str	r2, [ip]
+	str	r2, [r0]
+	str	r2, [r1]
+	str	r2, [r3]
+	pop	{r4, r5, r6, lr}
+	bx	lr
+.L227:
+	.align	2
+.L226:
+	.word	birds
+	.word	heart
+	.word	ones
+	.word	tens
+	.word	hundreds
+	.word	lostLife
+	.word	timer
+	.word	level
+	.word	blackWeight
+	.word	lTimer
+	.word	levelChangeTimer
+	.word	alphaBlendTimer
+	.word	initLevel2Change
+	.word	initLevel3Change
+	.word	matesGone
+	.word	matesKissed
+	.word	level2
+	.word	level3
+	.word	isCheat
+	.word	alphaUp
+	.word	alphaDown
+	.word	gamehOff0
+	.size	initGame, .-initGame
 	.align	2
 	.global	addFireball
 	.syntax unified
@@ -1353,22 +1360,22 @@ addFireball:
 	@ Function supports interworking.
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	ldr	ip, .L241
+	ldr	ip, .L238
 	mov	r3, #0
 	mov	r2, ip
-	b	.L234
-.L232:
+	b	.L231
+.L229:
 	add	r3, r3, #1
 	cmp	r3, #9
 	add	r2, r2, #20
 	bxeq	lr
-.L234:
+.L231:
 	ldr	r1, [r2, #16]
 	cmp	r1, #0
-	bne	.L232
+	bne	.L229
 	str	lr, [sp, #-4]!
 	mov	lr, #1
-	ldr	r2, .L241+4
+	ldr	r2, .L238+4
 	ldr	r1, [r2, r0, lsl #5]
 	add	r0, r2, r0, lsl #5
 	add	r3, r3, r3, lsl #2
@@ -1380,9 +1387,9 @@ addFireball:
 	str	r0, [r1, #4]
 	ldr	lr, [sp], #4
 	bx	lr
-.L242:
+.L239:
 	.align	2
-.L241:
+.L238:
 	.word	fireball
 	.word	lizard
 	.size	addFireball, .-addFireball
@@ -1397,24 +1404,24 @@ updateFireball:
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
-	ldr	r4, .L263
-	ldr	r5, .L263+4
-	ldr	r8, .L263+8
-	ldr	r7, .L263+12
-	ldr	r10, .L263+16
-	ldr	fp, .L263+20
-	ldr	r9, .L263+24
+	ldr	r4, .L260
+	ldr	r5, .L260+4
+	ldr	r8, .L260+8
+	ldr	r7, .L260+12
+	ldr	r10, .L260+16
+	ldr	fp, .L260+20
+	ldr	r9, .L260+24
 	sub	sp, sp, #20
 	add	r6, r4, #180
-	b	.L254
-.L245:
+	b	.L251
+.L242:
 	add	r4, r4, #20
 	cmp	r4, r6
-	beq	.L261
-.L254:
+	beq	.L258
+.L251:
 	ldr	r3, [r4, #16]
 	cmp	r3, #0
-	beq	.L245
+	beq	.L242
 	ldr	r3, [r4, #4]
 	cmp	r3, #2
 	movle	r2, #0
@@ -1435,20 +1442,20 @@ updateFireball:
 	mov	lr, pc
 	bx	r8
 	cmp	r0, #0
-	beq	.L245
+	beq	.L242
 	mov	r3, #0
-.L253:
+.L250:
 	ldr	r2, [r7, r3, lsl #4]
 	cmp	r2, #0
 	lsl	r2, r3, #4
-	beq	.L262
+	beq	.L259
 	add	r3, r3, #1
 	cmp	r3, #5
-	bne	.L253
-.L252:
+	bne	.L250
+.L249:
 	mov	r2, #0
 	mov	r0, r10
-	ldr	r1, .L263+28
+	ldr	r1, .L260+28
 	mov	lr, pc
 	bx	fp
 	mov	r2, #0
@@ -1458,21 +1465,21 @@ updateFireball:
 	add	r3, r3, #1
 	cmp	r4, r6
 	str	r3, [r9]
-	bne	.L254
-.L261:
+	bne	.L251
+.L258:
 	add	sp, sp, #20
 	@ sp needed
 	pop	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
 	bx	lr
-.L262:
+.L259:
 	ldr	r1, [r4]
 	cmp	r1, #15
 	addle	r1, r1, #5
-	ble	.L251
+	ble	.L248
 	cmp	r1, #144
 	subgt	r1, r1, #5
-.L251:
-	ldr	ip, .L263+32
+.L248:
+	ldr	ip, .L260+32
 	mov	lr, #0
 	str	r1, [ip, r3, lsl #4]
 	mov	r3, #1
@@ -1482,10 +1489,10 @@ updateFireball:
 	str	r0, [r2, #4]
 	str	lr, [r2, #8]
 	str	r3, [r2, #12]
-	b	.L252
-.L264:
+	b	.L249
+.L261:
 	.align	2
-.L263:
+.L260:
 	.word	fireball
 	.word	birds
 	.word	collision
@@ -1506,18 +1513,18 @@ drawFireball:
 	@ Function supports interworking.
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	ldr	r2, .L276
-	ldr	r3, .L276+4
+	ldr	r2, .L273
+	ldr	r3, .L273+4
 	push	{r4, r5, lr}
 	mov	ip, #512
 	ldr	lr, [r2]
 	mov	r5, #340
-	ldr	r2, .L276+8
+	ldr	r2, .L273+8
 	add	r0, r3, #180
-	b	.L268
-.L275:
+	b	.L265
+.L272:
 	cmp	lr, #0
-	bne	.L266
+	bne	.L263
 	ldr	r1, [r3, #4]
 	ldr	r4, [r3]
 	add	r3, r3, #20
@@ -1527,23 +1534,23 @@ drawFireball:
 	strh	r1, [r2, #162]	@ movhi
 	strh	r4, [r2, #160]	@ movhi
 	add	r2, r2, #8
-	beq	.L274
-.L268:
+	beq	.L271
+.L265:
 	ldr	r1, [r3, #16]
 	cmp	r1, #0
-	bne	.L275
-.L266:
+	bne	.L272
+.L263:
 	add	r3, r3, #20
 	cmp	r3, r0
 	strh	ip, [r2, #160]	@ movhi
 	add	r2, r2, #8
-	bne	.L268
-.L274:
+	bne	.L265
+.L271:
 	pop	{r4, r5, lr}
 	bx	lr
-.L277:
+.L274:
 	.align	2
-.L276:
+.L273:
 	.word	isCheat
 	.word	fireball
 	.word	shadowOAM
@@ -1563,8 +1570,8 @@ initHeart:
 	mov	ip, #145
 	mov	r1, #16
 	mov	r0, #1
-	ldr	r3, .L282
-.L279:
+	ldr	r3, .L279
+.L276:
 	str	r2, [r3, #4]
 	add	r2, r2, #16
 	cmp	r2, #80
@@ -1573,11 +1580,11 @@ initHeart:
 	str	r1, [r3, #12]
 	str	r0, [r3, #16]
 	add	r3, r3, #20
-	bne	.L279
+	bne	.L276
 	bx	lr
-.L283:
+.L280:
 	.align	2
-.L282:
+.L279:
 	.word	heart
 	.size	initHeart, .-initHeart
 	.align	2
@@ -1591,27 +1598,27 @@ updateHeart:
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
 	@ link register save eliminated.
-	ldr	r3, .L292
+	ldr	r3, .L289
 	ldr	r1, [r3]
 	rsb	r1, r1, #4
 	cmp	r1, #3
 	bxgt	lr
 	mov	r0, #0
-	ldr	r3, .L292+4
+	ldr	r3, .L289+4
 	add	r2, r1, r1, lsl #2
 	sub	r1, r3, #80
 	add	r1, r1, r2, lsl #2
-.L287:
+.L284:
 	ldr	r2, [r3, #96]
 	cmp	r2, #0
 	strne	r0, [r3, #96]
 	sub	r3, r3, #20
 	cmp	r3, r1
-	bne	.L287
+	bne	.L284
 	bx	lr
-.L293:
+.L290:
 	.align	2
-.L292:
+.L289:
 	.word	matesGone
 	.word	heart
 	.size	updateHeart, .-updateHeart
@@ -1627,11 +1634,11 @@ drawHeart:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, lr}
 	mov	r4, #276
-	ldr	r3, .L300
-	ldr	r2, .L300+4
-	ldr	lr, .L300+8
+	ldr	r3, .L297
+	ldr	r2, .L297+4
+	ldr	lr, .L297+8
 	add	ip, r3, #40
-.L297:
+.L294:
 	ldr	r0, [r2, #16]
 	ldrh	r1, [r2, #4]
 	cmp	r0, #0
@@ -1644,16 +1651,140 @@ drawHeart:
 	add	r3, r3, #8
 	cmp	ip, r3
 	add	r2, r2, #20
-	bne	.L297
+	bne	.L294
 	pop	{r4, lr}
 	bx	lr
-.L301:
+.L298:
 	.align	2
-.L300:
+.L297:
 	.word	shadowOAM
 	.word	heart
 	.word	278
 	.size	drawHeart, .-drawHeart
+	.align	2
+	.global	initLostLife
+	.syntax unified
+	.arm
+	.fpu softvfp
+	.type	initLostLife, %function
+initLostLife:
+	@ Function supports interworking.
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 0, uses_anonymous_args = 0
+	@ link register save eliminated.
+	mov	r2, #0
+	ldr	r3, .L303
+	add	r1, r3, #80
+.L300:
+	str	r2, [r3]
+	str	r2, [r3, #4]
+	str	r2, [r3, #8]
+	str	r2, [r3, #12]
+	add	r3, r3, #16
+	cmp	r3, r1
+	bne	.L300
+	bx	lr
+.L304:
+	.align	2
+.L303:
+	.word	lostLife
+	.size	initLostLife, .-initLostLife
+	.align	2
+	.global	addLostLife
+	.syntax unified
+	.arm
+	.fpu softvfp
+	.type	addLostLife, %function
+addLostLife:
+	@ Function supports interworking.
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 0, uses_anonymous_args = 0
+	mov	r3, #0
+	ldr	ip, .L318
+	ldr	r2, [ip, r3, lsl #4]
+	cmp	r2, #0
+	lsl	r2, r3, #4
+	beq	.L317
+.L306:
+	add	r3, r3, #1
+	cmp	r3, #5
+	bxeq	lr
+	ldr	r2, [ip, r3, lsl #4]
+	cmp	r2, #0
+	lsl	r2, r3, #4
+	bne	.L306
+.L317:
+	cmp	r1, #15
+	push	{r4, lr}
+	addle	r1, r1, #5
+	ble	.L308
+	cmp	r1, #144
+	subgt	r1, r1, #5
+.L308:
+	mov	r4, #0
+	mov	lr, #1
+	ldr	ip, .L318+4
+	add	r0, r0, #5
+	add	r2, ip, r2
+	str	r4, [r2, #8]
+	str	lr, [r2, #12]
+	str	r0, [r2, #4]
+	str	r1, [ip, r3, lsl #4]
+	pop	{r4, lr}
+	bx	lr
+.L319:
+	.align	2
+.L318:
+	.word	lostLife+12
+	.word	lostLife
+	.size	addLostLife, .-addLostLife
+	.align	2
+	.global	drawLostLife
+	.syntax unified
+	.arm
+	.fpu softvfp
+	.type	drawLostLife, %function
+drawLostLife:
+	@ Function supports interworking.
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 0, uses_anonymous_args = 0
+	push	{r4, r5, lr}
+	mov	lr, #512
+	mov	r5, #0
+	ldr	r3, .L327
+	ldr	r2, .L327+4
+	ldr	r4, .L327+8
+	add	r0, r3, #80
+.L324:
+	ldr	r1, [r3, #12]
+	cmp	r1, #0
+	strheq	lr, [r2, #232]	@ movhi
+	beq	.L323
+	ldr	r1, [r3, #8]
+	cmp	r1, #49
+	ldrle	ip, [r3, #4]
+	add	r1, r1, #1
+	strle	r1, [r3, #8]
+	ldrle	r1, [r3]
+	orrle	ip, ip, #16384
+	strhle	r4, [r2, #236]	@ movhi
+	strhle	ip, [r2, #234]	@ movhi
+	strhle	r1, [r2, #232]	@ movhi
+	strgt	r5, [r3, #12]
+.L323:
+	add	r3, r3, #16
+	cmp	r3, r0
+	add	r2, r2, #8
+	bne	.L324
+	pop	{r4, r5, lr}
+	bx	lr
+.L328:
+	.align	2
+.L327:
+	.word	lostLife
+	.word	shadowOAM
+	.word	278
+	.size	drawLostLife, .-drawLostLife
 	.align	2
 	.global	initScore
 	.syntax unified
@@ -1666,16 +1797,16 @@ initScore:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	@ link register save eliminated.
 	mov	r3, #0
-	ldr	r0, .L303
-	ldr	r1, .L303+4
-	ldr	r2, .L303+8
+	ldr	r0, .L330
+	ldr	r1, .L330+4
+	ldr	r2, .L330+8
 	str	r3, [r0]
 	str	r3, [r1]
 	str	r3, [r2]
 	bx	lr
-.L304:
+.L331:
 	.align	2
-.L303:
+.L330:
 	.word	ones
 	.word	tens
 	.word	hundreds
@@ -1690,47 +1821,47 @@ updateScore:
 	@ Function supports interworking.
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	ldr	r3, .L312
-	ldr	ip, .L312+4
+	ldr	r3, .L339
+	ldr	ip, .L339+4
 	ldr	r2, [r3]
 	smull	r1, r3, ip, r2
 	asr	r1, r2, #31
 	rsb	r3, r1, r3, asr #2
-	ldr	r0, .L312+8
+	ldr	r0, .L339+8
 	add	r3, r3, r3, lsl #2
 	sub	r3, r2, r3, lsl #1
 	cmp	r2, #9
 	str	r3, [r0]
 	bxle	lr
 	cmp	r2, #99
-	ble	.L307
+	ble	.L334
 	mvn	r0, #99
 	push	{r4, lr}
-	ldr	lr, .L312+12
+	ldr	lr, .L339+12
 	smull	r4, lr, r2, lr
 	rsb	r1, r1, lr, asr #5
 	mla	r2, r0, r1, r2
 	sub	r3, r2, r3
 	smull	r2, ip, r3, ip
-	ldr	r0, .L312+16
-	ldr	r2, .L312+20
+	ldr	r0, .L339+16
+	ldr	r2, .L339+20
 	asr	r3, r3, #31
 	rsb	r3, r3, ip, asr #2
 	str	r3, [r0]
 	str	r1, [r2]
 	pop	{r4, lr}
 	bx	lr
-.L307:
-	ldr	r1, .L312+24
+.L334:
+	ldr	r1, .L339+24
 	sub	r3, r2, r3
 	umull	r2, r3, r1, r3
-	ldr	r2, .L312+16
+	ldr	r2, .L339+16
 	lsr	r3, r3, #3
 	str	r3, [r2]
 	bx	lr
-.L313:
+.L340:
 	.align	2
-.L312:
+.L339:
 	.word	matesKissed
 	.word	1717986919
 	.word	ones
@@ -1749,101 +1880,94 @@ updateGame:
 	@ Function supports interworking.
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	ldr	r3, .L339
+	ldr	r3, .L364
 	ldr	r3, [r3]
 	cmp	r3, #0
-	push	{r4, lr}
-	beq	.L315
-	ldr	r3, .L339+4
-	ldr	r2, [r3]
-	cmp	r2, #100
-	movgt	r2, #50
-	strgt	r2, [r3]
-.L315:
-	ldr	r3, .L339+8
+	push	{r4, r5, r6, lr}
+	ldr	r5, .L364+4
+	beq	.L342
+	ldr	r3, [r5]
+	cmp	r3, #100
+	movgt	r3, #50
+	strgt	r3, [r5]
+.L342:
+	ldr	r3, .L364+8
 	ldrh	r3, [r3]
 	tst	r3, #1
-	bne	.L334
-	ldr	r4, .L339+12
-.L316:
-	ldr	r0, .L339+16
-	ldr	lr, .L339+20
-	ldr	ip, .L339+24
-	ldrh	r1, [lr]
-	ldrh	r2, [ip]
-	ldr	r3, [r0]
-	add	r1, r1, #1
+	bne	.L360
+	ldr	r4, .L364+12
+.L343:
+	ldr	ip, .L364+16
+	ldrh	r3, [ip]
+	ldr	r0, .L364+20
+	ldr	r1, .L364+24
 	add	r3, r3, #1
+	ldrh	r2, [r1]
+	strh	r3, [ip]	@ movhi
+	ldr	r3, [r0]
 	add	r2, r2, #1
+	add	r3, r3, #1
 	str	r3, [r0]
-	strh	r1, [lr]	@ movhi
-	strh	r2, [ip]	@ movhi
+	strh	r2, [r1]	@ movhi
 	bl	updateCasanova
 	ldr	r3, [r0]
 	cmp	r3, #100
 	bleq	addMates.part.0
-.L318:
-	ldr	r3, [r4]
-	cmp	r3, #0
-	beq	.L337
-.L319:
+.L345:
+	ldr	r3, [r5]
+	add	r3, r3, #1
+	str	r3, [r5]
+	bl	addLizard
 	bl	updateMates
+	bl	updateLizard
 	ldr	r3, [r4]
 	cmp	r3, #0
-	beq	.L338
-.L320:
-	ldr	r3, .L339+28
+	beq	.L363
+.L346:
+	ldr	r3, .L364+28
 	ldr	r1, [r3]
 	rsb	r1, r1, #4
 	cmp	r1, #3
-	bgt	.L321
+	bgt	.L347
 	mov	r0, #0
-	ldr	r3, .L339+32
+	ldr	r3, .L364+32
 	add	r2, r1, r1, lsl #2
 	sub	r1, r3, #80
 	add	r1, r1, r2, lsl #2
-.L323:
+.L349:
 	ldr	r2, [r3, #96]
 	cmp	r2, #0
 	strne	r0, [r3, #96]
 	sub	r3, r3, #20
 	cmp	r3, r1
-	bne	.L323
-.L321:
+	bne	.L349
+.L347:
 	bl	updateScore
-	pop	{r4, lr}
+	pop	{r4, r5, r6, lr}
 	b	alphaBlending
-.L334:
-	ldr	r3, .L339+36
+.L360:
+	ldr	r3, .L364+36
 	ldrh	r3, [r3]
 	ands	r3, r3, #1
-	ldr	r4, .L339+12
-	bne	.L316
+	ldr	r4, .L364+12
+	bne	.L343
 	ldr	r2, [r4]
 	cmp	r2, #0
 	moveq	r3, #1
 	str	r3, [r4]
-	b	.L316
-.L338:
-	bl	updateLizard
+	b	.L343
+.L363:
 	bl	updateFireball
-	b	.L320
-.L337:
-	ldr	r2, .L339+4
-	ldr	r3, [r2]
-	add	r3, r3, #1
-	str	r3, [r2]
-	bl	addLizard
-	b	.L319
-.L340:
+	b	.L346
+.L365:
 	.align	2
-.L339:
+.L364:
 	.word	level2
 	.word	lTimer
 	.word	oldButtons
 	.word	isCheat
-	.word	timer
 	.word	hOff0
+	.word	timer
 	.word	hOff1
 	.word	matesGone
 	.word	heart
@@ -1861,36 +1985,36 @@ drawScore:
 	@ frame_needed = 0, uses_anonymous_args = 0
 	push	{r4, r5, r6, lr}
 	mov	r4, #320
-	ldr	r3, .L346
-	lsl	lr, r1, #16
+	ldr	r3, .L371
+	lsl	lr, r0, #16
 	ldr	r6, [r3]
-	ldr	r2, .L346+4
-	ldr	r3, .L346+8
+	ldr	r2, .L371+4
+	ldr	r3, .L371+8
 	lsr	lr, lr, #16
-	orr	r1, r1, #16384
+	orr	r0, r0, #16384
 	ldr	r2, [r2]
-	strh	r1, [r3, #2]	@ movhi
-	add	r1, lr, #16
-	orr	r1, r1, #16384
+	strh	r0, [r3, #2]	@ movhi
+	add	r0, lr, #16
+	orr	r0, r0, #16384
 	add	ip, lr, #30
-	strh	r1, [r3, #10]	@ movhi
-	lsl	r0, r0, #16
-	ldr	r1, .L346+12
+	strh	r0, [r3, #10]	@ movhi
+	lsl	r1, r1, #16
+	ldr	r0, .L371+12
 	add	r2, r2, #128
 	orr	ip, ip, #16384
-	lsr	r0, r0, #16
+	lsr	r1, r1, #16
 	lsl	ip, ip, #16
 	lsl	r2, r2, #17
 	cmp	r6, #9
-	strh	r0, [r3]	@ movhi
-	strh	r0, [r3, #8]	@ movhi
+	strh	r1, [r3]	@ movhi
+	strh	r1, [r3, #8]	@ movhi
 	strh	r4, [r3, #4]	@ movhi
-	strh	r1, [r3, #12]	@ movhi
+	strh	r0, [r3, #12]	@ movhi
 	lsr	ip, ip, #16
 	lsr	r2, r2, #16
-	ble	.L342
-	ldr	r1, .L346+16
-	ldr	r5, [r1]
+	ble	.L367
+	ldr	r0, .L371+16
+	ldr	r5, [r0]
 	add	r4, lr, #35
 	add	r5, r5, #128
 	orr	r4, r4, #16384
@@ -1899,42 +2023,42 @@ drawScore:
 	cmp	r6, #99
 	lsr	r5, r5, #16
 	lsr	r4, r4, #16
-	ble	.L343
-	ldr	r1, .L346+20
-	ldr	r6, [r1]
-	add	r1, lr, #40
+	ble	.L368
+	ldr	r0, .L371+20
+	ldr	r6, [r0]
+	add	r0, lr, #40
 	add	lr, r6, #128
 	lsl	lr, lr, #1
-	orr	r1, r1, #16384
+	orr	r0, r0, #16384
 	strh	r4, [r3, #26]	@ movhi
 	strh	r5, [r3, #28]	@ movhi
 	strh	lr, [r3, #36]	@ movhi
-	strh	r1, [r3, #18]	@ movhi
-	strh	r0, [r3, #32]	@ movhi
+	strh	r0, [r3, #18]	@ movhi
+	strh	r1, [r3, #32]	@ movhi
 	strh	ip, [r3, #34]	@ movhi
-	strh	r0, [r3, #24]	@ movhi
-	strh	r0, [r3, #16]	@ movhi
+	strh	r1, [r3, #24]	@ movhi
+	strh	r1, [r3, #16]	@ movhi
 	strh	r2, [r3, #20]	@ movhi
 	pop	{r4, r5, r6, lr}
 	bx	lr
-.L342:
-	strh	r0, [r3, #16]	@ movhi
+.L367:
+	strh	r1, [r3, #16]	@ movhi
 	strh	ip, [r3, #18]	@ movhi
 	strh	r2, [r3, #20]	@ movhi
 	pop	{r4, r5, r6, lr}
 	bx	lr
-.L343:
+.L368:
 	strh	r5, [r3, #28]	@ movhi
 	strh	r4, [r3, #18]	@ movhi
-	strh	r0, [r3, #24]	@ movhi
+	strh	r1, [r3, #24]	@ movhi
 	strh	ip, [r3, #26]	@ movhi
-	strh	r0, [r3, #16]	@ movhi
+	strh	r1, [r3, #16]	@ movhi
 	strh	r2, [r3, #20]	@ movhi
 	pop	{r4, r5, r6, lr}
 	bx	lr
-.L347:
+.L372:
 	.align	2
-.L346:
+.L371:
 	.word	matesKissed
 	.word	ones
 	.word	shadowOAM
@@ -1942,130 +2066,6 @@ drawScore:
 	.word	tens
 	.word	hundreds
 	.size	drawScore, .-drawScore
-	.align	2
-	.global	initLostLife
-	.syntax unified
-	.arm
-	.fpu softvfp
-	.type	initLostLife, %function
-initLostLife:
-	@ Function supports interworking.
-	@ args = 0, pretend = 0, frame = 0
-	@ frame_needed = 0, uses_anonymous_args = 0
-	@ link register save eliminated.
-	mov	r2, #0
-	ldr	r3, .L352
-	add	r1, r3, #80
-.L349:
-	str	r2, [r3]
-	str	r2, [r3, #4]
-	str	r2, [r3, #8]
-	str	r2, [r3, #12]
-	add	r3, r3, #16
-	cmp	r3, r1
-	bne	.L349
-	bx	lr
-.L353:
-	.align	2
-.L352:
-	.word	lostLife
-	.size	initLostLife, .-initLostLife
-	.align	2
-	.global	addLostLife
-	.syntax unified
-	.arm
-	.fpu softvfp
-	.type	addLostLife, %function
-addLostLife:
-	@ Function supports interworking.
-	@ args = 0, pretend = 0, frame = 0
-	@ frame_needed = 0, uses_anonymous_args = 0
-	mov	r3, #0
-	ldr	ip, .L367
-	ldr	r2, [ip, r3, lsl #4]
-	cmp	r2, #0
-	lsl	r2, r3, #4
-	beq	.L366
-.L355:
-	add	r3, r3, #1
-	cmp	r3, #5
-	bxeq	lr
-	ldr	r2, [ip, r3, lsl #4]
-	cmp	r2, #0
-	lsl	r2, r3, #4
-	bne	.L355
-.L366:
-	cmp	r1, #15
-	push	{r4, lr}
-	addle	r1, r1, #5
-	ble	.L357
-	cmp	r1, #144
-	subgt	r1, r1, #5
-.L357:
-	mov	r4, #0
-	mov	lr, #1
-	ldr	ip, .L367+4
-	add	r0, r0, #5
-	add	r2, ip, r2
-	str	r4, [r2, #8]
-	str	lr, [r2, #12]
-	str	r0, [r2, #4]
-	str	r1, [ip, r3, lsl #4]
-	pop	{r4, lr}
-	bx	lr
-.L368:
-	.align	2
-.L367:
-	.word	lostLife+12
-	.word	lostLife
-	.size	addLostLife, .-addLostLife
-	.align	2
-	.global	drawLostLife
-	.syntax unified
-	.arm
-	.fpu softvfp
-	.type	drawLostLife, %function
-drawLostLife:
-	@ Function supports interworking.
-	@ args = 0, pretend = 0, frame = 0
-	@ frame_needed = 0, uses_anonymous_args = 0
-	push	{r4, r5, lr}
-	mov	lr, #512
-	mov	r5, #0
-	ldr	r3, .L376
-	ldr	r2, .L376+4
-	ldr	r4, .L376+8
-	add	r0, r3, #80
-.L373:
-	ldr	r1, [r3, #12]
-	cmp	r1, #0
-	strheq	lr, [r2, #232]	@ movhi
-	beq	.L372
-	ldr	r1, [r3, #8]
-	cmp	r1, #49
-	ldrle	ip, [r3, #4]
-	add	r1, r1, #1
-	strle	r1, [r3, #8]
-	ldrle	r1, [r3]
-	orrle	ip, ip, #16384
-	strhle	r4, [r2, #236]	@ movhi
-	strhle	ip, [r2, #234]	@ movhi
-	strhle	r1, [r2, #232]	@ movhi
-	strgt	r5, [r3, #12]
-.L372:
-	add	r3, r3, #16
-	cmp	r3, r0
-	add	r2, r2, #8
-	bne	.L373
-	pop	{r4, r5, lr}
-	bx	lr
-.L377:
-	.align	2
-.L376:
-	.word	lostLife
-	.word	shadowOAM
-	.word	278
-	.size	drawLostLife, .-drawLostLife
 	.align	2
 	.global	drawGame
 	.syntax unified
@@ -2076,8 +2076,8 @@ drawGame:
 	@ Function supports interworking.
 	@ args = 0, pretend = 0, frame = 0
 	@ frame_needed = 0, uses_anonymous_args = 0
-	ldr	r2, .L383
-	ldr	r3, .L383+4
+	ldr	r2, .L378
+	ldr	r3, .L378+4
 	ldr	r1, [r2]
 	ldrh	r2, [r3, #4]
 	cmp	r1, #0
@@ -2085,7 +2085,7 @@ drawGame:
 	ldr	r3, [r3, #16]
 	push	{r4, lr}
 	addne	r3, r3, #32
-	ldr	r4, .L383+8
+	ldr	r4, .L378+8
 	orr	r2, r2, #32768
 	lsl	r3, r3, #2
 	strh	r3, [r4, #108]	@ movhi
@@ -2095,20 +2095,20 @@ drawGame:
 	bl	drawLizard
 	bl	drawFireball
 	bl	drawHeart
-	mov	r1, #2
-	mov	r0, #0
+	mov	r1, #0
+	mov	r0, #2
 	bl	drawScore
 	mov	r2, #0
 	mov	lr, #324
-	ldr	r3, .L383+12
+	ldr	r3, .L378+12
 	ldr	r3, [r3]
 	add	r3, r3, #128
 	lsl	r3, r3, #1
-	ldr	ip, .L383+16
-	ldr	r0, .L383+20
+	ldr	ip, .L378+16
+	ldr	r0, .L378+20
 	strh	r3, [r4, #100]	@ movhi
-	ldr	r1, .L383+24
-	ldr	r3, .L383+28
+	ldr	r1, .L378+24
+	ldr	r3, .L378+28
 	strh	lr, [r4, #84]	@ movhi
 	strh	r2, [r4, #80]	@ movhi
 	strh	r2, [r4, #88]	@ movhi
@@ -2119,21 +2119,21 @@ drawGame:
 	strh	r3, [r4, #98]	@ movhi
 	bl	drawLostLife
 	mov	r2, #67108864
-	ldr	r3, .L383+32
+	ldr	r3, .L378+32
 	ldrh	r1, [r3]
-	ldr	r4, .L383+36
+	ldr	r4, .L378+36
 	strh	r1, [r2, #84]	@ movhi
 	mov	r3, #512
 	mov	r2, #117440512
 	mov	r0, #3
-	ldr	r1, .L383+8
+	ldr	r1, .L378+8
 	mov	lr, pc
 	bx	r4
 	pop	{r4, lr}
 	bx	lr
-.L384:
+.L379:
 	.align	2
-.L383:
+.L378:
 	.word	isCheat
 	.word	birds
 	.word	shadowOAM
@@ -2156,23 +2156,22 @@ drawGame:
 	.comm	hundreds,4,4
 	.comm	tens,4,4
 	.comm	ones,4,4
+	.comm	alphaDown,4,4
+	.comm	alphaUp,4,4
+	.comm	alphaBlendTimer,4,4
 	.comm	blackWeight,4,4
 	.comm	isCheat,4,4
 	.comm	matesKissed,4,4
-	.comm	lCol,4,4
-	.comm	lRow,4,4
 	.comm	levelChangeTimer,4,4
 	.comm	level,4,4
 	.comm	level3,4,4
 	.comm	level2,4,4
 	.comm	initLevel3Change,4,4
 	.comm	initLevel2Change,4,4
-	.comm	alphaDown,4,4
-	.comm	alphaUp,4,4
-	.comm	alphaBlendTimer,4,4
 	.comm	matesGone,4,4
 	.comm	lTimer,4,4
 	.comm	timer,4,4
+	.comm	gamehOff0,4,4
 	.comm	hOff1,2,2
 	.comm	hOff0,2,2
 	.comm	vOff1,2,2

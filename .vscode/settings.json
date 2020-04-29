@@ -1,5 +1,9 @@
 {
     "files.associations": {
-        "pause.h": "c"
+        "pause.h": "c",
+        "sky.h": "c",
+        "missedmate.h": "c",
+        "instructions.h": "c",
+        "game.h": "c"
     }
 }

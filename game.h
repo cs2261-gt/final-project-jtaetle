@@ -4,7 +4,6 @@ void updateGame();
 void drawGame();
 void initLevel2();
 void initLevel3();
-void updateLevel();
 void drawLevel();
 void initCasanova();
 void updateCasanova();
@@ -41,6 +40,8 @@ unsigned short vOff1;
 //Horizontal Offset
 unsigned short hOff0;
 unsigned short hOff1;
+
+int gamehOff0;
 
 //Bird Struct
 typedef struct {
@@ -116,13 +117,6 @@ int lTimer;
 //keep track of mates lost
 int matesGone;
 
-//alpha blending timer
-int alphaBlendTimer;
-
-//determines to add/subtract from alpha blend
-int alphaUp;
-int alphaDown;
-
 //initialize Levels
 int initLevel2Change;
 int initLevel3Change;
@@ -136,9 +130,6 @@ int level;
 
 //level Change Timer
 int levelChangeTimer;
-
-int lRow;
-int lCol;
 
 //Keep track of mates kissed
 int matesKissed;
@@ -157,6 +148,13 @@ int isCheat;
 
 //alpha blending weight
 int blackWeight;
+
+//alpha blending timer
+int alphaBlendTimer;
+
+//determines to add/subtract from alpha blend
+int alphaUp;
+int alphaDown;
 
 //Score
 int ones;

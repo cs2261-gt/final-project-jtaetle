@@ -47,22 +47,28 @@ goToStart:
 	ldr	r1, .L4+32
 	mov	lr, pc
 	bx	r4
-	mov	r0, #3
 	mov	r3, #2048
+	mov	r0, #3
 	ldr	r2, .L4+36
 	ldr	r1, .L4+40
 	mov	lr, pc
 	bx	r4
+	ldr	r0, .L4+44
+	mov	r2, #1
+	ldr	r1, .L4+48
+	ldr	r3, .L4+52
+	mov	lr, pc
+	bx	r3
 	mov	r1, #0
-	ldr	r2, .L4+44
-	ldr	r3, .L4+48
+	ldr	r2, .L4+56
+	ldr	r3, .L4+60
 	str	r1, [r2]
 	mov	lr, pc
 	bx	r3
 	mov	r3, #512
 	mov	r2, #117440512
 	mov	r0, #3
-	ldr	r1, .L4+52
+	ldr	r1, .L4+64
 	mov	lr, pc
 	bx	r4
 	pop	{r4, lr}
@@ -81,6 +87,9 @@ goToStart:
 	.word	startTiles
 	.word	100720640
 	.word	startMap
+	.word	startSong
+	.word	136568
+	.word	playSoundA
 	.word	state
 	.word	hideSprites
 	.word	shadowOAM
@@ -110,7 +119,7 @@ initialize:
 	mov	lr, pc
 	bx	r3
 	mov	r3, #0
-	mov	ip, #26
+	mov	ip, #28
 	mov	r1, #4
 	ldr	r2, .L8+12
 	ldr	lr, .L8+16
@@ -549,7 +558,7 @@ goToInstructions:
 	ldr	r4, .L42+4
 	strh	r0, [r2]	@ movhi
 	strh	r1, [r2, #8]	@ movhi
-	mov	r3, #512
+	mov	r3, #32
 	mov	r2, #83886080
 	mov	r0, #3
 	ldr	r1, .L42+8
@@ -561,14 +570,23 @@ goToInstructions:
 	ldr	r1, .L42+16
 	mov	lr, pc
 	bx	r4
-	mov	r3, #4096
-	ldr	r2, .L42+20
 	mov	r0, #3
+	ldr	r2, .L42+20
 	ldr	r1, .L42+24
+	mov	r3, #4096
+	mov	lr, pc
+	bx	r4
+	ldr	r3, .L42+28
+	mov	lr, pc
+	bx	r3
+	mov	r3, #512
+	mov	r2, #117440512
+	mov	r0, #3
+	ldr	r1, .L42+32
 	mov	lr, pc
 	bx	r4
 	mov	r2, #3
-	ldr	r3, .L42+28
+	ldr	r3, .L42+36
 	pop	{r4, lr}
 	str	r2, [r3]
 	bx	lr
@@ -577,11 +595,13 @@ goToInstructions:
 .L42:
 	.word	hOff0
 	.word	DMANow
-	.word	instructionsnewPal
-	.word	32064
-	.word	instructionsnewTiles
+	.word	instructionsPal
+	.word	32128
+	.word	instructionsTiles
 	.word	100720640
-	.word	instructionsnewMap
+	.word	instructionsMap
+	.word	hideSprites
+	.word	shadowOAM
 	.word	state
 	.size	goToInstructions, .-goToInstructions
 	.align	2
@@ -631,7 +651,13 @@ start:
 	ldr	r3, .L56+20
 	mov	lr, pc
 	bx	r3
-	ldr	r3, .L56+24
+	mov	r2, #1
+	ldr	r1, .L56+24
+	ldr	r0, .L56+28
+	ldr	r3, .L56+32
+	mov	lr, pc
+	bx	r3
+	ldr	r3, .L56+36
 	mov	lr, pc
 	bx	r3
 	bl	goToGame
@@ -646,6 +672,9 @@ start:
 	.word	buttons
 	.word	srand
 	.word	stopSound
+	.word	158374
+	.word	gameSong
+	.word	playSoundA
 	.word	initGame
 	.size	start, .-start
 	.align	2
@@ -705,8 +734,14 @@ instructions:
 	ldr	r3, .L76+20
 	mov	lr, pc
 	bx	r3
+	ldr	r1, .L76+24
+	ldr	r0, .L76+28
+	mov	r2, #1
+	ldr	r3, .L76+32
+	mov	lr, pc
+	bx	r3
 	ldr	r2, .L76+12
-	ldr	r3, .L76+24
+	ldr	r3, .L76+36
 	strh	r4, [r2]	@ movhi
 	mov	lr, pc
 	bx	r3
@@ -721,6 +756,9 @@ instructions:
 	.word	vOff0
 	.word	350
 	.word	stopSound
+	.word	158374
+	.word	gameSong
+	.word	playSoundA
 	.word	initGame
 	.size	instructions, .-instructions
 	.align	2
@@ -771,19 +809,24 @@ goToLose:
 	ldr	r3, .L80+48
 	mov	lr, pc
 	bx	r3
-	mov	r1, #104
-	mov	r0, #135
+	mov	r1, #135
+	mov	r0, #102
 	ldr	r3, .L80+52
+	mov	lr, pc
+	bx	r3
+	mov	r1, #127
+	mov	r0, #104
+	ldr	r3, .L80+56
 	mov	lr, pc
 	bx	r3
 	mov	r3, #512
 	mov	r2, #117440512
 	mov	r0, #3
-	ldr	r1, .L80+56
+	ldr	r1, .L80+60
 	mov	lr, pc
 	bx	r4
 	mov	r2, #4
-	ldr	r3, .L80+60
+	ldr	r3, .L80+64
 	pop	{r4, lr}
 	str	r2, [r3]
 	bx	lr
@@ -804,6 +847,7 @@ goToLose:
 	.word	loseMap
 	.word	hideSprites
 	.word	drawScore
+	.word	drawLevel
 	.word	shadowOAM
 	.word	state
 	.size	goToLose, .-goToLose
@@ -859,13 +903,29 @@ game:
 	ldr	r3, .L98+28
 	mov	lr, pc
 	bx	r3
+	mov	r2, #1
+	ldr	r1, .L98+32
+	ldr	r0, .L98+36
+	ldr	r3, .L98+40
+	mov	lr, pc
+	bx	r3
 	bl	goToLose
 	b	.L84
 .L94:
-	ldr	r3, .L98+32
+	ldr	r3, .L98+44
+	ldr	r2, .L98+48
+	ldrh	r1, [r3]
+	ldr	r3, .L98+52
+	str	r1, [r2]
 	mov	lr, pc
 	bx	r3
-	ldr	r3, .L98+36
+	ldr	r3, .L98+56
+	mov	lr, pc
+	bx	r3
+	mov	r2, #1
+	ldr	r1, .L98+60
+	ldr	r0, .L98+64
+	ldr	r3, .L98+68
 	mov	lr, pc
 	bx	r3
 	bl	goToPause
@@ -881,8 +941,16 @@ game:
 	.word	initLevel2Change
 	.word	initLevel3Change
 	.word	stopSound
+	.word	150700
+	.word	loseSong
+	.word	playSoundA
+	.word	hOff0
+	.word	gamehOff0
 	.word	stopSoundB
 	.word	pauseSoundA
+	.word	169244
+	.word	pauseSong
+	.word	playSoundB
 	.size	game, .-game
 	.align	2
 	.global	pause
@@ -921,15 +989,25 @@ pause:
 	ldr	r3, .L112+12
 	mov	lr, pc
 	bx	r3
+	mov	r2, #1
+	ldr	r1, .L112+16
+	ldr	r0, .L112+20
+	ldr	r3, .L112+24
+	mov	lr, pc
+	bx	r3
 	pop	{r4, lr}
 	b	goToLose
 .L110:
-	ldr	r3, .L112+16
+	ldr	r3, .L112+28
 	mov	lr, pc
 	bx	r3
-	ldr	r3, .L112+20
+	ldr	r3, .L112+32
 	mov	lr, pc
 	bx	r3
+	ldr	r2, .L112+36
+	ldr	r3, .L112+40
+	ldr	r2, [r2]
+	strh	r2, [r3]	@ movhi
 	bl	goToGame
 	ldrh	r2, [r4]
 	b	.L101
@@ -940,8 +1018,13 @@ pause:
 	.word	oldButtons
 	.word	buttons
 	.word	stopSound
+	.word	150700
+	.word	loseSong
+	.word	playSoundA
 	.word	stopSoundB
 	.word	unpauseSoundA
+	.word	gamehOff0
+	.word	hOff0
 	.size	pause, .-pause
 	.section	.text.startup,"ax",%progbits
 	.align	2
@@ -963,28 +1046,19 @@ main:
 	ldr	r6, .L129+4
 	ldr	r4, .L129+8
 	ldr	fp, .L129+12
-	ldr	r5, .L129+16
-	ldr	r10, .L129+20
+	ldr	r10, .L129+16
+	ldr	r5, .L129+20
 	ldr	r9, .L129+24
 	ldr	r8, .L129+28
 .L124:
 	ldrh	r3, [r4]
-	ldr	r2, .L129+32
 	strh	r3, [r6]	@ movhi
-	ldrh	r3, [fp]
-	ldrh	r2, [r2, #48]
-	lsr	r3, r3, #1
-	strh	r2, [r4]	@ movhi
-	strh	r3, [r7, #16]	@ movhi
-	ldrh	r3, [r5]
-	lsr	r3, r3, #2
-	strh	r3, [r7, #20]	@ movhi
-	ldrh	r3, [r10]
-	strh	r3, [r7, #18]	@ movhi
-	ldr	r3, .L129+36
-	ldrh	r3, [r3]
-	strh	r3, [r7, #22]	@ movhi
-	ldr	r3, [r9]
+	ldr	r3, .L129+32
+	ldrh	r3, [r3, #48]
+	strh	r3, [r4]	@ movhi
+	mov	lr, pc
+	bx	fp
+	ldr	r3, [r10]
 	cmp	r3, #6
 	ldrls	pc, [pc, r3, asl #2]
 	b	.L115
@@ -997,12 +1071,21 @@ main:
 	.word	.L118
 	.word	.L116
 .L116:
-	ldr	r3, .L129+40
+	ldr	r3, .L129+36
 	mov	lr, pc
 	bx	r3
 .L115:
-	mov	lr, pc
-	bx	r8
+	ldrh	r3, [r9]
+	lsr	r3, r3, #1
+	strh	r3, [r7, #16]	@ movhi
+	ldrh	r3, [r5]
+	lsr	r3, r3, #2
+	strh	r3, [r7, #20]	@ movhi
+	ldr	r3, .L129+40
+	ldrh	r3, [r3]
+	strh	r3, [r7, #18]	@ movhi
+	ldrh	r3, [r8]
+	strh	r3, [r7, #22]	@ movhi
 	b	.L124
 .L118:
 	ldr	r3, .L129+44
@@ -1049,14 +1132,14 @@ main:
 	.word	initialize
 	.word	oldButtons
 	.word	buttons
-	.word	hOff0
-	.word	hOff1
-	.word	vOff0
-	.word	state
 	.word	waitForVBlank
-	.word	67109120
+	.word	state
+	.word	hOff1
+	.word	hOff0
 	.word	vOff1
+	.word	67109120
 	.word	level3State
+	.word	vOff0
 	.word	level2State
 	.word	goToStart
 	.word	instructions
@@ -1107,23 +1190,22 @@ lose:
 	.comm	hundreds,4,4
 	.comm	tens,4,4
 	.comm	ones,4,4
+	.comm	alphaDown,4,4
+	.comm	alphaUp,4,4
+	.comm	alphaBlendTimer,4,4
 	.comm	blackWeight,4,4
 	.comm	isCheat,4,4
 	.comm	matesKissed,4,4
-	.comm	lCol,4,4
-	.comm	lRow,4,4
 	.comm	levelChangeTimer,4,4
 	.comm	level,4,4
 	.comm	level3,4,4
 	.comm	level2,4,4
 	.comm	initLevel3Change,4,4
 	.comm	initLevel2Change,4,4
-	.comm	alphaDown,4,4
-	.comm	alphaUp,4,4
-	.comm	alphaBlendTimer,4,4
 	.comm	matesGone,4,4
 	.comm	lTimer,4,4
 	.comm	timer,4,4
+	.comm	gamehOff0,4,4
 	.comm	hOff1,2,2
 	.comm	hOff0,2,2
 	.comm	vOff1,2,2

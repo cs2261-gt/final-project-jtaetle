@@ -2,8 +2,6 @@
 #include "start.h"
 #include "skystart.h"
 #include "instructions.h"
-#include "instructionsnew.h"
-#include "skyinstructions.h"
 #include "sky.h"
 #include "game.h"
 #include "pause.h"
@@ -15,7 +13,6 @@
 #include "level3.h"
 #include "skylevel3.h"
 #include "spritesheet.h"
-#include "newtree.h"
 #include "tree.h"
 #include "startSong.h"
 #include "gameSong.h"
@@ -72,10 +69,7 @@ int main() {
         oldButtons = buttons;
         buttons = BUTTONS;
 
-        REG_BG0HOFF = hOff0 / 2;
-        REG_BG1HOFF = hOff1 / 4;
-        REG_BG0VOFF = vOff0;
-        REG_BG1VOFF = vOff1;
+        waitForVBlank();
 
         switch (state) {
         case START:
@@ -103,7 +97,11 @@ int main() {
             break;
         }
 
-        waitForVBlank();
+        REG_BG0HOFF = hOff0 / 2;
+        REG_BG1HOFF = hOff1 / 4;
+        REG_BG0VOFF = vOff0;
+        REG_BG1VOFF = vOff1;
+        
 	}
 
     return 0;
@@ -126,7 +124,7 @@ void initialize() {
     hOff1 = 0;
     vOff0 = 0;
     vOff1 = 0;
-    screenBlockBG0 = 26;
+    screenBlockBG0 = 28;
     screenBlockBG1 = 4;
 
     goToStart();
@@ -147,7 +145,7 @@ void goToStart() {
 
     DMANow(3, startMap, &SCREENBLOCK[28], startMapLen);
 
-    //playSoundA(startSong, STARTSONGLEN, 1);
+    playSoundA(startSong, STARTSONGLEN, 1);
     
     state = START;
 
@@ -165,7 +163,7 @@ void start() {
     if(BUTTON_PRESSED(BUTTON_START)) {
         srand(seed);
         stopSound();
-        //playSoundA(gameSong, GAMESONGLEN - 75, 1);
+        playSoundA(gameSong, GAMESONGLEN - 75, 1);
         initGame();
         goToGame();
     }
@@ -215,17 +213,17 @@ void game() {
     drawGame();
 
     if(BUTTON_PRESSED(BUTTON_START)) {
-        //pauseSound();
+        gamehOff0 = hOff0;
         stopSoundB();
         pauseSoundA();
-        //playSoundB(pauseSong, PAUSESONGLEN - 100, 1);
+        playSoundB(pauseSong, PAUSESONGLEN - 100, 1);
         goToPause();
     }
    
     //lose condition
     if(matesGone == 5) {
         stopSound();
-        //playSoundA(loseSong, LOSESONGLEN - 500, 1);
+        playSoundA(loseSong, LOSESONGLEN - 500, 1);
         goToLose();
     }
 
@@ -324,6 +322,7 @@ void goToPause() {
     hideSprites();
     DMANow(3, shadowOAM, OAM, 512);
     state = PAUSE;
+
 }
 
 //pause state
@@ -334,21 +333,18 @@ void pause() {
     if(BUTTON_PRESSED(BUTTON_START)) {
         stopSoundB();
         unpauseSoundA();
+        hOff0 = gamehOff0;
         goToGame();
     }
     if(BUTTON_PRESSED(BUTTON_SELECT)) {
         stopSound();
-        //playSoundA(loseSong, LOSESONGLEN - 500, 1);
+        playSoundA(loseSong, LOSESONGLEN - 500, 1);
         goToLose();
     }
 }
 
 //Set Up Instructions State
 void goToInstructions() {
-    //REG_BG0HOFF = 0;
-    //DMANow(3, instructionsPal, PALETTE, 16);
-    //DMANow(3, instructionsTiles, &CHARBLOCK[0], instructionsTilesLen / 2);
-    //DMANow(3, instructionsMap, &SCREENBLOCK[28], 1024 * 4);
     hOff0 = 0;
 
     REG_DISPCTL = MODE0 | BG0_ENABLE | SPRITE_ENABLE;
@@ -356,15 +352,12 @@ void goToInstructions() {
     //initialize instructions
     REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(28) | BG_SIZE_TALL | BG_4BPP;
 
-    //initialize sky
-    //REG_BG1CNT = BG_CHARBLOCK(1) | BG_SCREENBLOCK(4) | BG_4BPP | BG_SIZE_TALL;
+    DMANow(3, instructionsPal, PALETTE, instructionsPalLen);
+    DMANow(3, instructionsTiles, &CHARBLOCK[0], instructionsTilesLen);
+    DMANow(3, instructionsMap, &SCREENBLOCK[28], instructionsMapLen);
 
-    DMANow(3, instructionsnewPal, PALETTE, instructionsnewPalLen);
-    //DMANow(3, skyinstructionsTiles, &CHARBLOCK[1], skyinstructionsTilesLen);
-    //DMANow(3, skyinstructionsMap, &SCREENBLOCK[4], skyinstructionsMapLen);
-    DMANow(3, instructionsnewTiles, &CHARBLOCK[0], instructionsnewTilesLen);
-    DMANow(3, instructionsnewMap, &SCREENBLOCK[28], instructionsnewMapLen);
-
+    hideSprites();
+    DMANow(3, shadowOAM, OAM, 512);
     state = INSTRUCTIONS;
 }
 
@@ -373,7 +366,7 @@ void instructions() {
 
     if(BUTTON_PRESSED(BUTTON_START)) {
         stopSound();
-        //playSoundA(gameSong, GAMESONGLEN - 75, 1);
+        playSoundA(gameSong, GAMESONGLEN - 75, 1);
         vOff0 = 0;
         initGame();
         goToGame();
@@ -384,10 +377,6 @@ void instructions() {
         if(vOff0 < 512-160-1) {
             vOff0++;
         }
-        //vOff0++;
-        /*if((vOff1 < 350)) {
-            vOff1++;
-        }*/
     }
 
     //scroll up
@@ -396,20 +385,6 @@ void instructions() {
             vOff0--;
         }
     }
-
-    //XL Background vOff check for instructions
-   /*if (vOff0 >= 256 && screenBlockBG0 < 27) {
-        vOff0 = 0;
-        screenBlockBG0++;
-        REG_BG0CNT = BG_CHARBLOCK(0) | BG_SCREENBLOCK(screenBlockBG0) | BG_SIZE_TALL | BG_4BPP;
-    }*/
-
-    //XL Background vOff check for sky
-    /*if ((vOff1 >= 256) && (screenBlockBG1 < 6)) {
-        screenBlockBG1++;
-        vOff1 -= 256;
-        REG_BG1CNT = BG_CHARBLOCK(1) | BG_SCREENBLOCK(screenBlockBG1) | BG_4BPP | BG_SIZE_TALL;
-    }*/
 
 }
 
@@ -428,7 +403,8 @@ void goToLose() {
     DMANow(3, loseMap, &SCREENBLOCK[28], loseMapLen);
     
     hideSprites();
-    drawScore(135, 104);
+    drawScore(102, 135);
+    drawLevel(104, 127);
     DMANow(3, shadowOAM, OAM, 512);
     state = LOSE;
 }

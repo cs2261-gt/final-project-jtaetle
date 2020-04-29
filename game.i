@@ -117,7 +117,6 @@ void updateGame();
 void drawGame();
 void initLevel2();
 void initLevel3();
-void updateLevel();
 void drawLevel();
 void initCasanova();
 void updateCasanova();
@@ -154,6 +153,8 @@ unsigned short vOff1;
 
 unsigned short hOff0;
 unsigned short hOff1;
+
+int gamehOff0;
 
 
 typedef struct {
@@ -204,7 +205,7 @@ typedef struct {
     int missedTimer;
     int isActive;
 } LOSTLIFE;
-# 111 "game.h"
+# 112 "game.h"
 int timer;
 
 
@@ -212,13 +213,6 @@ int lTimer;
 
 
 int matesGone;
-
-
-int alphaBlendTimer;
-
-
-int alphaUp;
-int alphaDown;
 
 
 int initLevel2Change;
@@ -234,49 +228,33 @@ int level;
 
 int levelChangeTimer;
 
-int lRow;
-int lCol;
-
 
 int matesKissed;
 
 
 int isCheat;
-# 159 "game.h"
+# 150 "game.h"
 int blackWeight;
+
+
+int alphaBlendTimer;
+
+
+int alphaUp;
+int alphaDown;
 
 
 int ones;
 int tens;
 int hundreds;
 # 3 "game.c" 2
-# 1 "sky.h" 1
-# 22 "sky.h"
-extern const unsigned short skyTiles[2592];
-
-
-extern const unsigned short skyMap[1024];
-
-
-extern const unsigned short skyPal[256];
-# 4 "game.c" 2
-# 1 "treetop.h" 1
-# 22 "treetop.h"
-extern const unsigned short treetopTiles[3152];
-
-
-extern const unsigned short treetopMap[2048];
-
-
-extern const unsigned short treetopPal[16];
-# 5 "game.c" 2
 # 1 "spritesheet.h" 1
 # 21 "spritesheet.h"
 extern const unsigned short spritesheetTiles[16384];
 
 
 extern const unsigned short spritesheetPal[256];
-# 6 "game.c" 2
+# 4 "game.c" 2
 # 1 "sound.h" 1
 SOUND soundA;
 SOUND soundB;
@@ -296,14 +274,14 @@ void stopSound();
 void pauseSoundA();
 void unpauseSoundA();
 void stopSoundB();
-# 7 "game.c" 2
+# 5 "game.c" 2
 # 1 "missedMate.h" 1
 
 
 
 
 extern const signed char missedMate[5615];
-# 8 "game.c" 2
+# 6 "game.c" 2
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 1 3
 # 10 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 3
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/machine/ieeefp.h" 1 3
@@ -1112,7 +1090,7 @@ extern long double _strtold_r (struct _reent *, const char *restrict, char **res
 extern long double strtold (const char *restrict, char **restrict);
 # 336 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdlib.h" 3
 
-# 9 "game.c" 2
+# 7 "game.c" 2
 # 1 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdio.h" 1 3
 # 36 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdio.h" 3
 # 1 "/opt/devkitpro/devkitARM/lib/gcc/arm-none-eabi/9.1.0/include/stddef.h" 1 3 4
@@ -1523,11 +1501,11 @@ _putchar_unlocked(int _c)
 }
 # 797 "/opt/devkitpro/devkitARM/arm-none-eabi/include/stdio.h" 3
 
-# 10 "game.c" 2
+# 8 "game.c" 2
 
 
 
-# 12 "game.c"
+# 10 "game.c"
 OBJ_ATTR shadowOAM[128];
 
 
@@ -1607,6 +1585,8 @@ void initGame() {
     alphaUp = 0;
     alphaDown = 0;
 
+    gamehOff0 = 0;
+
 }
 
 void updateGame() {
@@ -1636,17 +1616,15 @@ void updateGame() {
 
     addMates();
 
-    if (!(isCheat)) {
 
-        lTimer++;
-        addLizard();
-    }
+    lTimer++;
+    addLizard();
 
     updateMates();
 
-    if (!(isCheat)) {
+    updateLizard();
 
-        updateLizard();
+    if (!(isCheat)) {
 
         updateFireball();
 
@@ -1680,9 +1658,9 @@ void drawGame() {
 
     drawHeart();
 
-    drawScore(0, 2);
+    drawScore(2, 0);
 
-    drawLevel();
+    drawLevel(200, 0);
 
     drawLostLife();
 
@@ -1696,6 +1674,7 @@ void initLevel2() {
     level++;
 
     hOff0 = 0;
+    gamehOff0 = hOff0;
     initLevel2Change = 0;
     levelChangeTimer = 0;
 
@@ -1717,6 +1696,7 @@ void initLevel3() {
 
 
     hOff0 = 0;
+    gamehOff0 = hOff0;
     initLevel3Change = 0;
     levelChangeTimer = 0;
 
@@ -1759,18 +1739,18 @@ void alphaBlending() {
 }
 
 
-void drawLevel() {
+void drawLevel(int col, int row) {
 
-    shadowOAM[10].attr0 = (0<<8) | (0<<13) | (0<<14) | 0 | (0<<10);
-    shadowOAM[10].attr1 = (1<<14) | 200;
+    shadowOAM[10].attr0 = (0<<8) | (0<<13) | (0<<14) | row | (0<<10);
+    shadowOAM[10].attr1 = (1<<14) | col;
     shadowOAM[10].attr2 = ((0)<<12) | ((10)*32+(4));
-    shadowOAM[11].attr0 = (0<<8) | (0<<13) | (0<<14) | 0 | (0<<10);
-    shadowOAM[11].attr1 = (1<<14) | 216;
+    shadowOAM[11].attr0 = (0<<8) | (0<<13) | (0<<14) | row | (0<<10);
+    shadowOAM[11].attr1 = (1<<14) | col + 16;
     shadowOAM[11].attr2 = ((0)<<12) | ((10)*32+(6));
 
 
-    shadowOAM[12].attr0 = (0<<8) | (0<<13) | (0<<14) | 0 | (0<<10);
-    shadowOAM[12].attr1 = (1<<14) | 228;
+    shadowOAM[12].attr0 = (0<<8) | (0<<13) | (0<<14) | row | (0<<10);
+    shadowOAM[12].attr1 = (1<<14) | col + 28;
     shadowOAM[12].attr2 = ((0)<<12) | ((8)*32+(2 * level));
 }
 
@@ -1958,7 +1938,7 @@ void addLizard() {
                     lizard[i].aniState = LIZARD1;
                     lizard[i].aniCounter = 0;
 
-                    if (level3) {
+                    if (level3 && !isCheat) {
                         addFireball(i);
                     }
                     break;
@@ -2026,7 +2006,7 @@ void updateLizard() {
 
 void drawLizard() {
     for (int i = 0; i < 3; i++) {
-        if ((lizard[i].isActive) && !(isCheat)) {
+        if ((lizard[i].isActive)) {
             shadowOAM[17+i].attr0 = (0<<8) | (0<<13) | (0<<14) | lizard[i].row;
             shadowOAM[17+i].attr1 = (2<<14) | lizard[i].col;
             shadowOAM[17+i].attr2 = ((0)<<12) | ((4)*32+((lizard[i].aniState + 3) * 4));
@@ -2131,66 +2111,6 @@ void drawHeart() {
     }
 }
 
-
-void initScore() {
-    ones = 0;
-    tens = 0;
-    hundreds = 0;
-
-}
-
-
-void updateScore() {
-    ones = matesKissed % 10;
-    if (matesKissed > 9) {
-        if (matesKissed > 99){
-            hundreds = matesKissed / 100;
-            tens = (matesKissed - (hundreds * 100) - ones) / 10;
-        } else {
-            tens = (matesKissed - ones) / 10;
-        }
-    }
-
-}
-
-
-void drawScore(int scorePlaceRow, int scorePlaceCol) {
-
-
-    shadowOAM[0].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
-    shadowOAM[0].attr1 = (1<<14) | scorePlaceCol;
-    shadowOAM[0].attr2 = ((0)<<12) | ((10)*32+(0));
-    shadowOAM[1].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
-    shadowOAM[1].attr1 = (1<<14) | (scorePlaceCol + 16);
-    shadowOAM[1].attr2 = ((0)<<12) | ((10)*32+(2));
-
-
-    if (matesKissed > 9) {
-        if (matesKissed > 99) {
-            shadowOAM[4].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
-            shadowOAM[4].attr1 = (1<<14) | (scorePlaceCol + 30);
-            shadowOAM[4].attr2 = ((0)<<12) | ((8)*32+(2 * hundreds));
-            shadowOAM[3].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
-            shadowOAM[3].attr1 = (1<<14) | (scorePlaceCol + 35);
-            shadowOAM[3].attr2 = ((0)<<12) | ((8)*32+(2 * tens));
-            shadowOAM[2].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
-            shadowOAM[2].attr1 = (1<<14) | (scorePlaceCol + 40);
-            shadowOAM[2].attr2 = ((0)<<12) | ((8)*32+(2 * ones));
-        } else {
-            shadowOAM[3].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
-            shadowOAM[3].attr1 = (1<<14) | (scorePlaceCol + 30);
-            shadowOAM[3].attr2 = ((0)<<12) | ((8)*32+(2 * tens));
-            shadowOAM[2].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
-            shadowOAM[2].attr1 = (1<<14) | (scorePlaceCol + 35);
-            shadowOAM[2].attr2 = ((0)<<12) | ((8)*32+(2 * ones));
-        }
-    } else {
-        shadowOAM[2].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow ;
-        shadowOAM[2].attr1 = (1<<14) | (scorePlaceCol + 30);
-        shadowOAM[2].attr2 = ((0)<<12) | ((8)*32+(2 * ones));
-    }
-}
-
 void initLostLife() {
     for (int i = 0; i < 5; i++) {
         lostLife[i].row = 0;
@@ -2231,5 +2151,65 @@ void drawLostLife() {
         } else {
             shadowOAM[29+i].attr0 = (2<<8);
         }
+    }
+}
+
+
+void initScore() {
+    ones = 0;
+    tens = 0;
+    hundreds = 0;
+
+}
+
+
+void updateScore() {
+    ones = matesKissed % 10;
+    if (matesKissed > 9) {
+        if (matesKissed > 99){
+            hundreds = matesKissed / 100;
+            tens = (matesKissed - (hundreds * 100) - ones) / 10;
+        } else {
+            tens = (matesKissed - ones) / 10;
+        }
+    }
+
+}
+
+
+void drawScore(int scorePlaceCol, int scorePlaceRow) {
+
+
+    shadowOAM[0].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
+    shadowOAM[0].attr1 = (1<<14) | scorePlaceCol;
+    shadowOAM[0].attr2 = ((0)<<12) | ((10)*32+(0));
+    shadowOAM[1].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
+    shadowOAM[1].attr1 = (1<<14) | (scorePlaceCol + 16);
+    shadowOAM[1].attr2 = ((0)<<12) | ((10)*32+(2));
+
+
+    if (matesKissed > 9) {
+        if (matesKissed > 99) {
+            shadowOAM[4].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
+            shadowOAM[4].attr1 = (1<<14) | (scorePlaceCol + 30);
+            shadowOAM[4].attr2 = ((0)<<12) | ((8)*32+(2 * hundreds));
+            shadowOAM[3].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
+            shadowOAM[3].attr1 = (1<<14) | (scorePlaceCol + 35);
+            shadowOAM[3].attr2 = ((0)<<12) | ((8)*32+(2 * tens));
+            shadowOAM[2].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
+            shadowOAM[2].attr1 = (1<<14) | (scorePlaceCol + 40);
+            shadowOAM[2].attr2 = ((0)<<12) | ((8)*32+(2 * ones));
+        } else {
+            shadowOAM[3].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
+            shadowOAM[3].attr1 = (1<<14) | (scorePlaceCol + 30);
+            shadowOAM[3].attr2 = ((0)<<12) | ((8)*32+(2 * tens));
+            shadowOAM[2].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow;
+            shadowOAM[2].attr1 = (1<<14) | (scorePlaceCol + 35);
+            shadowOAM[2].attr2 = ((0)<<12) | ((8)*32+(2 * ones));
+        }
+    } else {
+        shadowOAM[2].attr0 = (0<<8) | (0<<13) | (0<<14) | scorePlaceRow ;
+        shadowOAM[2].attr1 = (1<<14) | (scorePlaceCol + 30);
+        shadowOAM[2].attr2 = ((0)<<12) | ((8)*32+(2 * ones));
     }
 }
