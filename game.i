@@ -1580,10 +1580,13 @@ void initGame() {
 
     isCheat = 0;
 
+
     blackWeight = 16;
+
 
     alphaUp = 0;
     alphaDown = 0;
+
 
     gamehOff0 = 0;
 
@@ -1745,12 +1748,12 @@ void drawLevel(int col, int row) {
     shadowOAM[10].attr1 = (1<<14) | col;
     shadowOAM[10].attr2 = ((0)<<12) | ((10)*32+(4));
     shadowOAM[11].attr0 = (0<<8) | (0<<13) | (0<<14) | row | (0<<10);
-    shadowOAM[11].attr1 = (1<<14) | col + 16;
+    shadowOAM[11].attr1 = (1<<14) | (col + 16);
     shadowOAM[11].attr2 = ((0)<<12) | ((10)*32+(6));
 
 
     shadowOAM[12].attr0 = (0<<8) | (0<<13) | (0<<14) | row | (0<<10);
-    shadowOAM[12].attr1 = (1<<14) | col + 28;
+    shadowOAM[12].attr1 = (1<<14) | (col + 28);
     shadowOAM[12].attr2 = ((0)<<12) | ((8)*32+(2 * level));
 }
 
@@ -1880,6 +1883,7 @@ void updateMates() {
             birds[0].height, birds[i].col, birds[i].row, birds[i].width, birds[i].height))) {
                 birds[i].isActive = 0;
                 matesKissed++;
+                addLostLife(birds[i].col, birds[i].row);
 
                 if (matesKissed == 10) {
                     initLevel2Change = 1;
@@ -1947,7 +1951,7 @@ void addLizard() {
             lTimer = 0;
         }
     } else {
-        if (lTimer == 350) {
+        if (lTimer == 325) {
             for (int i = 0; i < 3; i++) {
                 if (!lizard[i].isActive) {
                     lizard[i].col = 240;
@@ -1980,7 +1984,7 @@ void updateLizard() {
                 if (lizard[i].col == 0) {
                     lizard[i].isActive = 0;
                 } else {
-                    lizard[i].col -= 1.0001;
+                    lizard[i].col -= 1;
                 }
             }
             if (lizard[i].aniCounter == 8) {
@@ -2090,7 +2094,6 @@ void initHeart() {
 void updateHeart() {
     for (int i = 5 - 1; i > ((5 - 1) - matesGone); i--){
         if (heart[i].isActive) {
-
             heart[i].isActive = 0;
         }
     }

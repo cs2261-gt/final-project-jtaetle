@@ -417,5 +417,4 @@ void lose() {
     if(BUTTON_PRESSED(BUTTON_START)) {
         goToStart();
     }
-
 }

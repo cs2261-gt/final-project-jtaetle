@@ -2051,5 +2051,4 @@ void lose() {
     if((!(~(oldButtons)&((1<<3))) && (~buttons & ((1<<3))))) {
         goToStart();
     }
-
 }

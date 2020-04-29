@@ -249,12 +249,12 @@ void drawLevel(int col, int row) {
     shadowOAM[10].attr1 = ATTR1_SMALL | col;
     shadowOAM[10].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(4, 10);
     shadowOAM[11].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | row | ATTR0_NOBLEND;
-    shadowOAM[11].attr1 = ATTR1_SMALL | col + 16;
+    shadowOAM[11].attr1 = ATTR1_SMALL | (col + 16);
     shadowOAM[11].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(6, 10);
 
     //draw the actual level
     shadowOAM[12].attr0 = ATTR0_REGULAR | ATTR0_4BPP | ATTR0_SQUARE | row | ATTR0_NOBLEND;
-    shadowOAM[12].attr1 = ATTR1_SMALL | col + 28;
+    shadowOAM[12].attr1 = ATTR1_SMALL | (col + 28);
     shadowOAM[12].attr2 = ATTR2_PALROW(0) |  ATTR2_TILEID(2 * level, 8);
 }
 
@@ -451,7 +451,7 @@ void addLizard() {
             lTimer = 0;
         }
     } else {
-        if (lTimer == 350) {
+        if (lTimer == 325) {
             for (int i = 0; i < LIZARDCOUNT; i++) {
                 if (!lizard[i].isActive) {
                     lizard[i].col = 240;
@@ -484,7 +484,7 @@ void updateLizard() {
                 if (lizard[i].col == 0) {
                     lizard[i].isActive = 0;
                 } else {
-                    lizard[i].col -= 1.0001;
+                    lizard[i].col -= 1;
                 }
             }
             if (lizard[i].aniCounter == 8) {
@@ -594,7 +594,6 @@ void initHeart() {
 void updateHeart() {
     for (int i = HEARTCOUNT - 1; i > ((HEARTCOUNT - 1) - matesGone); i--){ 
         if (heart[i].isActive) {
-            //playSoundB(missedMate, MISSEDMATELEN - 125, 0);
             heart[i].isActive = 0;   
         }
     }
