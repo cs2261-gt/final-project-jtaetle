@@ -1883,7 +1883,6 @@ void updateMates() {
             birds[0].height, birds[i].col, birds[i].row, birds[i].width, birds[i].height))) {
                 birds[i].isActive = 0;
                 matesKissed++;
-                addLostLife(birds[i].col, birds[i].row);
 
                 if (matesKissed == 10) {
                     initLevel2Change = 1;
